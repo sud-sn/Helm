@@ -14,7 +14,11 @@ for (const candidate of ['.env', '../../.env']) {
 }
 
 const config = loadConfig();
-const database = createDatabase(config.databaseUrl, { max: config.databasePoolMax });
+const database = createDatabase(config.databaseUrl, {
+  max: config.databasePoolMax,
+  onIdleError: (err) =>
+    app.log.warn({ err }, 'The database closed an idle connection; it will be replaced'),
+});
 const app = await buildApp({ db: database.db, config });
 
 if (config.migrateOnStart) await runMigrations(database);
