@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { excerpt, extractMentions, formatTicketKey, parseTicketKey } from './text';
+import {
+  excerpt,
+  extractMentions,
+  formatTicketKey,
+  hasWrittenContent,
+  parseTicketKey,
+} from './text';
 
 describe('extractMentions', () => {
   it('finds handles and trims trailing punctuation', () => {
@@ -37,5 +43,19 @@ describe('excerpt', () => {
   it('collapses whitespace and truncates', () => {
     expect(excerpt('a  b\n\nc')).toBe('a b c');
     expect(excerpt('x'.repeat(200), 10)).toBe(`${'x'.repeat(9)}…`);
+  });
+});
+
+describe('hasWrittenContent', () => {
+  it('treats headings and empty bullets as nothing written', () => {
+    expect(hasWrittenContent('## Summary\n\n## Decisions\n- \n\n## Next steps\n- ')).toBe(false);
+    expect(hasWrittenContent('   \n\n')).toBe(false);
+    expect(hasWrittenContent('1. \n- [ ] \n*')).toBe(false);
+  });
+
+  it('finds real content under the headings', () => {
+    expect(hasWrittenContent('## Decisions\n- Cut-off moves to 02:00 UTC')).toBe(true);
+    expect(hasWrittenContent('Agreed the scope.')).toBe(true);
+    expect(hasWrittenContent('- [x] Share the spec')).toBe(true);
   });
 });

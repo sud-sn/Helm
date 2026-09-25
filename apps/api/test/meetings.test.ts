@@ -78,6 +78,12 @@ describe('meetings', () => {
       visibility: 'client',
     });
     expect(empty.status).toBe(400);
+    // An untouched template (headings and empty bullets) is not minutes yet either.
+    await dev.patch(`/api/meetings/${meeting.id}`, { minutes: '## Summary\n\n## Decisions\n- \n' });
+    const template = await ba.request('PUT', `/api/meetings/${meeting.id}/visibility`, {
+      visibility: 'client',
+    });
+    expect(template.status).toBe(400);
     await dev.patch(`/api/meetings/${meeting.id}`, {
       minutes: '## Decisions\n- Cut-off moves to 02:00 UTC',
     });

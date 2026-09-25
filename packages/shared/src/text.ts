@@ -37,3 +37,14 @@ export function excerpt(text: string, max = 140): string {
   const flat = text.replace(/\s+/g, ' ').trim();
   return flat.length <= max ? flat : `${flat.slice(0, max - 1).trimEnd()}…`;
 }
+
+/** A line with nothing written on it: blank, a heading, or an empty list item or checkbox. */
+const EMPTY_MARKDOWN_LINE = /^\s*(?:#{1,6}(?:\s.*)?|[-*+](?:\s+\[[ xX]\])?|\d+[.)])?\s*$/;
+
+/**
+ * True when Markdown holds real content rather than only headings and empty bullets, such as an
+ * untouched minutes template. Used before anything is shared with a client.
+ */
+export function hasWrittenContent(markdown: string): boolean {
+  return markdown.split('\n').some((line) => !EMPTY_MARKDOWN_LINE.test(line));
+}

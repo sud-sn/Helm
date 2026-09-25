@@ -2,6 +2,7 @@ import { and, asc, desc, eq, inArray, sql, type SQL } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import {
   formatTicketKey,
+  hasWrittenContent,
   type ActionItem,
   type CreateActionItemInput,
   type CreateMeetingInput,
@@ -219,7 +220,7 @@ export async function setMinutesVisibility(
   const row = await requireMeeting(ctx, meetingId);
   const scope = meetingScope(row);
   ctx.access.require('content.share', scope, 'You cannot share minutes with the client.');
-  if (visibility === 'client' && !row.meeting.minutes.trim()) {
+  if (visibility === 'client' && !hasWrittenContent(row.meeting.minutes)) {
     throw badRequest('Write the minutes before sharing them with the client.');
   }
   if (row.meeting.minutesVisibility !== visibility) {
