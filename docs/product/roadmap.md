@@ -4,7 +4,7 @@ Guiding rule: build standard project-management features to "good enough" and sp
 what makes Helm different — the client-facing pitch flow, meeting-to-ticket workflow, BI/ETL
 documentation and, later, AI assistance.
 
-## Phase 1 — Core platform (current)
+## Phase 1 — Core platform (built)
 
 - Admin-managed accounts: login, forced password change, lockout, sessions, audit log.
 - Hierarchy: Workspace → Client → Project → Cycle → Ticket, with scoped role grants for Delivery

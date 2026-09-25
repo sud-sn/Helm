@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { resolve, sep } from 'node:path';
 import fastifyStatic from '@fastify/static';
 import type { FastifyInstance } from 'fastify';
 
@@ -13,7 +13,22 @@ export async function registerSpa(app: FastifyInstance, distDir: string): Promis
     app.log.warn({ root }, 'WEB_DIST_DIR has no index.html; the web app will not be served');
     return;
   }
-  await app.register(fastifyStatic, { root, wildcard: false, index: ['index.html'] });
+  await app.register(fastifyStatic, {
+    root,
+    wildcard: false,
+    index: ['index.html'],
+    // Vite fingerprints everything in assets/, so those files never change and can be cached
+    // for a year. Everything else, index.html above all, is revalidated so a release shows at once.
+    cacheControl: false,
+    setHeaders: (reply, filePath) => {
+      reply.header(
+        'Cache-Control',
+        filePath.includes(`${sep}assets${sep}`)
+          ? 'public, max-age=31536000, immutable'
+          : 'no-cache',
+      );
+    },
+  });
   app.setNotFoundHandler((request, reply) => {
     if (request.url.startsWith('/api/') || request.method !== 'GET') {
       return reply.status(404).send({

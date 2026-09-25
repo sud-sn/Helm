@@ -18,17 +18,18 @@ helm/
 │   │   │   │   ├── migrate.ts    Applies SQL migrations from apps/api/drizzle/
 │   │   │   │   └── bootstrap.ts  Creates the first administrator on an empty database
 │   │   │   ├── core/             Cross-cutting code with no business rules
+│   │   │   │   ├── access/       Scoped permission checks and the SQL filters that apply them
 │   │   │   │   ├── errors.ts     HttpError types and the error → response mapping
 │   │   │   │   ├── validation.ts parse(schema, input) helpers
 │   │   │   │   ├── security/     Password hashing, random tokens
-│   │   │   │   └── …             csv.ts, dates.ts, audit.ts
+│   │   │   │   └── …             sessions.ts, audit.ts, csv.ts, sql.ts
 │   │   │   ├── plugins/          Fastify plugins: session auth, CSRF guard, SPA hosting
-│   │   │   └── modules/          One folder per business capability
+│   │   │   └── modules/          One folder per business capability (index.ts registers them)
 │   │   │       └── <module>/
 │   │   │           ├── <module>.routes.ts    HTTP only: validate input, call service, shape reply
 │   │   │           ├── <module>.service.ts   Business rules, authorisation, transactions
-│   │   │           ├── <module>.queries.ts   Reusable queries and row → DTO mappers (optional)
-│   │   │           └── index.ts              Registers the module's routes
+│   │   │           └── <module>.queries.ts   Reusable queries and row → DTO mappers (optional)
+│   │   ├── build.mjs             Production bundle (esbuild) → dist/main.js
 │   │   ├── drizzle/              Generated SQL migrations (committed, never edited by hand)
 │   │   └── test/                 Integration tests (real PostgreSQL) + test harness
 │   └── web/                      React single-page app
@@ -43,6 +44,7 @@ helm/
 │           ├── features/         One folder per business capability, mirroring the API modules
 │           │   └── <feature>/
 │           │       ├── api.ts          TanStack Query hooks (queries + mutations) for the feature
+│           │       ├── *.ts            Feature rules and hooks (e.g. who may create tickets where)
 │           │       └── components/     Feature UI (forms, lists, cards)
 │           ├── components/       Shared, domain-agnostic UI (EmptyState, PageHeader, Markdown…)
 │           ├── icons/            Icon registry: the only place that imports the icon library
