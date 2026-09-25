@@ -3,9 +3,10 @@ import { OPEN_TICKET_STATUSES, type Permission, type Project } from '@helm/share
 import type { Executor } from '../../db/client';
 import { clients, cycles, projects, tickets } from '../../db/schema';
 import type { Access } from '../../core/access/access';
-import { coverageCondition } from '../../core/access/conditions';
+import { anyOf } from '../../core/access/conditions';
 import { canSeeProject } from '../../core/access/navigation';
 import { notFound } from '../../core/errors';
+import { qualified } from '../../core/sql';
 
 export type ProjectRow = typeof projects.$inferSelect & { clientName: string };
 
@@ -53,13 +54,20 @@ export async function hasPermissionWithinProject(
 
 /** Open tickets in the project that the caller may read (so counts never leak hidden work). */
 export function openTicketCountSql(access: Access) {
-  const readable = coverageCondition(access.coverage('ticket.read'), {
-    clientId: projects.clientId,
-    projectId: tickets.projectId,
-    cycleId: tickets.cycleId,
-  });
+  const coverage = access.coverage('ticket.read');
+  const readable = coverage.all
+    ? undefined
+    : anyOf([
+        coverage.clientIds.length > 0
+          ? inArray(qualified(projects.clientId), coverage.clientIds)
+          : undefined,
+        coverage.projectIds.length > 0
+          ? inArray(tickets.projectId, coverage.projectIds)
+          : undefined,
+        coverage.cycleIds.length > 0 ? inArray(tickets.cycleId, coverage.cycleIds) : undefined,
+      ]);
   const conditions = and(
-    eq(tickets.projectId, projects.id),
+    sql`${tickets.projectId} = ${qualified(projects.id)}`,
     inArray(tickets.status, [...OPEN_TICKET_STATUSES]),
     readable,
   );

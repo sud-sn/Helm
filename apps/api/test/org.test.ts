@@ -147,6 +147,12 @@ describe('projects', () => {
     expect(cycleView.body[0]!.openTicketCount).toBe(1);
 
     expect((await cycleDev.get('/api/projects/GLX')).status).toBe(404);
+
+    // Same counts on the single-project endpoint (a correlated subquery without joins).
+    expect((await lead.get<Project>('/api/projects/ACME')).body.openTicketCount).toBe(2);
+    expect((await cycleDev.get<Project>('/api/projects/ACME')).body.openTicketCount).toBe(1);
+    const pm = await login(t, 'pm');
+    expect((await pm.get<Project>('/api/projects/ACME')).body.openTicketCount).toBe(2);
   });
 });
 

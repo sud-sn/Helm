@@ -12,12 +12,13 @@ import { cycles, projects, tickets } from '../../db/schema';
 import { coverageCondition } from '../../core/access/conditions';
 import { recordAudit } from '../../core/audit';
 import type { RequestContext } from '../../core/context';
+import { qualified } from '../../core/sql';
 import { badRequest, notFound } from '../../core/errors';
 import { requireProject } from '../projects/projects.queries';
 import { recordTicketEvent } from '../tickets/tickets.queries';
 
-const ticketCount = sql<number>`(select count(*)::int from ${tickets} where ${tickets.cycleId} = ${cycles.id} and ${tickets.status} <> 'cancelled')`;
-const doneCount = sql<number>`(select count(*)::int from ${tickets} where ${tickets.cycleId} = ${cycles.id} and ${tickets.status} = 'done')`;
+const ticketCount = sql<number>`(select count(*)::int from ${tickets} where ${tickets.cycleId} = ${qualified(cycles.id)} and ${tickets.status} <> 'cancelled')`;
+const doneCount = sql<number>`(select count(*)::int from ${tickets} where ${tickets.cycleId} = ${qualified(cycles.id)} and ${tickets.status} = 'done')`;
 
 function selectCycles(db: Executor) {
   return db

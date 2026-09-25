@@ -4,6 +4,7 @@ import {
   commentBodySchema,
   createTicketSchema,
   idSchema,
+  importTicketsSchema,
   ticketListQuerySchema,
   updateTicketSchema,
 } from '@helm/shared';
@@ -11,6 +12,7 @@ import { parse } from '../../core/validation';
 import { ctx } from '../../plugins/auth';
 import { projectKeyParams } from '../projects/projects.routes';
 import { addComment, deleteComment, editComment, listComments } from './comments.service';
+import { exportTickets, importTickets } from './import-export.service';
 import {
   createTicket,
   deleteTicket,
@@ -43,6 +45,26 @@ export async function ticketRoutes(app: FastifyInstance): Promise<void> {
       parse(createTicketSchema, request.body),
     );
     return reply.status(201).send(created);
+  });
+
+  app.post('/projects/:key/tickets/import', async (request) =>
+    importTickets(
+      ctx(request),
+      parse(projectKeyParams, request.params).key,
+      parse(importTicketsSchema, request.body),
+    ),
+  );
+
+  app.get('/projects/:key/tickets/export', async (request, reply) => {
+    const { filename, csv } = await exportTickets(
+      ctx(request),
+      parse(projectKeyParams, request.params).key,
+      parse(ticketListQuerySchema, request.query),
+    );
+    return reply
+      .header('content-type', 'text/csv; charset=utf-8')
+      .header('content-disposition', `attachment; filename="${filename}"`)
+      .send(csv);
   });
 
   app.get('/projects/:key/assignable-users', async (request) =>
