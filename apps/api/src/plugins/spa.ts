@@ -1,0 +1,30 @@
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+import fastifyStatic from '@fastify/static';
+import type { FastifyInstance } from 'fastify';
+
+/**
+ * Serves the built web app and falls back to index.html for client-side routes. API paths that
+ * match nothing still get a JSON 404.
+ */
+export async function registerSpa(app: FastifyInstance, distDir: string): Promise<void> {
+  const root = resolve(distDir);
+  if (!existsSync(resolve(root, 'index.html'))) {
+    app.log.warn({ root }, 'WEB_DIST_DIR has no index.html; the web app will not be served');
+    return;
+  }
+  await app.register(fastifyStatic, { root, wildcard: false, index: ['index.html'] });
+  app.setNotFoundHandler((request, reply) => {
+    if (request.url.startsWith('/api/') || request.method !== 'GET') {
+      return reply
+        .status(404)
+        .send({
+          error: {
+            code: 'NOT_FOUND',
+            message: `Route ${request.method} ${request.url} not found.`,
+          },
+        });
+    }
+    return reply.type('text/html').sendFile('index.html');
+  });
+}
