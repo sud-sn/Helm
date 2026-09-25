@@ -4,6 +4,8 @@
 services:
   db:
     image: postgres:16-alpine
+    # Start again after a reboot or a Docker restart, unless someone stopped it on purpose.
+    restart: unless-stopped
     environment:
       POSTGRES_USER: helm
       POSTGRES_PASSWORD: helm
@@ -22,6 +24,7 @@ services:
   app:
     profiles: ['app']
     build: .
+    restart: unless-stopped
     environment:
       DATABASE_URL: postgres://helm:helm@db:5432/helm
       HELM_ADMIN_USERNAME: ${HELM_ADMIN_USERNAME:-admin}
