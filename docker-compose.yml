@@ -1,5 +1,6 @@
 # Development: `docker compose up -d db` starts PostgreSQL for `npm run dev` and the tests.
-# Full stack:  `docker compose --profile app up --build` runs the production image on :3000.
+# Full stack:  `docker compose --profile app up -d --build` runs the production image on :3000.
+# Another program already using port 3000 or 5432? Set HELM_PORT or HELM_DB_PORT in .env.
 services:
   db:
     image: postgres:16-alpine
@@ -8,7 +9,8 @@ services:
       POSTGRES_PASSWORD: helm
       POSTGRES_DB: helm
     ports:
-      - '5432:5432'
+      # This machine only: ports Docker publishes bypass host firewalls such as ufw.
+      - '127.0.0.1:${HELM_DB_PORT:-5432}:5432'
     volumes:
       - helm-db:/var/lib/postgresql/data
     healthcheck:
@@ -25,12 +27,13 @@ services:
       HELM_ADMIN_USERNAME: ${HELM_ADMIN_USERNAME:-admin}
       HELM_ADMIN_PASSWORD: ${HELM_ADMIN_PASSWORD:-}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      TRUST_PROXY: ${TRUST_PROXY:-false}
       AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT:-}
       AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY:-}
       AZURE_OPENAI_DEPLOYMENT: ${AZURE_OPENAI_DEPLOYMENT:-}
       AZURE_OPENAI_API_VERSION: ${AZURE_OPENAI_API_VERSION:-2024-10-21}
     ports:
-      - '3000:3000'
+      - '${HELM_PORT:-3000}:3000'
     volumes:
       # The server's generated secret key, which protects keys saved on the AI assistant page.
       - helm-data:/app/data

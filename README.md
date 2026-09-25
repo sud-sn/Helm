@@ -67,10 +67,12 @@ docker run -p 3000:3000 \
   helm
 ```
 
-Or `docker compose --profile app up --build` for the app and a database together. Put it behind
-HTTPS and set `COOKIE_SECURE=true` (and `TRUST_PROXY=true` behind a reverse proxy). Everything,
-fonts included, is served from the container: the portal makes no requests to third parties.
-Other settings are listed in [`.env.example`](.env.example).
+Or `docker compose --profile app up --build` for the app and a database together. The database
+accepts connections from the same machine only; if another program already uses port 3000 or 5432,
+set `HELM_PORT` or `HELM_DB_PORT` in `.env`. Put it behind HTTPS and set `COOKIE_SECURE=true` (and
+`TRUST_PROXY=true` behind a reverse proxy). Everything, fonts included, is served from the
+container: the portal makes no requests to third parties. Other settings are listed in
+[`.env.example`](.env.example).
 
 ## AI assistant (Azure OpenAI)
 
