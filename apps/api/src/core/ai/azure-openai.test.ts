@@ -201,6 +201,65 @@ describe('Azure OpenAI provider', () => {
     expect((await failureOf(provider.generateJson(request))).kind).toBe('timeout');
   });
 
+  it('gives long answers more time, but never less than configured', async () => {
+    // Answers after 120 ms unless the request is cancelled first.
+    const slow = (async (_input: string | URL | Request, init?: RequestInit) =>
+      new Promise<Response>((resolve, reject) => {
+        const timer = setTimeout(() => resolve(completion('{"ok":true}')), 120);
+        init?.signal?.addEventListener('abort', () => {
+          clearTimeout(timer);
+          reject(init.signal!.reason);
+        });
+      })) as typeof fetch;
+    const provider = createAzureOpenAiProvider({ ...config, timeoutMs: 50 }, slow);
+    await expect(provider.generateJson({ ...request, timeoutMs: 1_000 })).resolves.toMatchObject({
+      output: { ok: true },
+    });
+    expect((await failureOf(provider.generateJson({ ...request, timeoutMs: 10 }))).kind).toBe(
+      'timeout',
+    );
+  });
+
+  it('lowers the output limit for model versions that allow fewer tokens', async () => {
+    const fetch = fakeFetch(
+      json(400, {
+        error: {
+          code: 'BadRequest',
+          message:
+            'max_tokens is too large: 12000. This model supports at most 4096 completion ' +
+            'tokens, whereas you provided 12000.',
+        },
+      }),
+      completion('{"ok":true}'),
+    );
+    const result = await createAzureOpenAiProvider(config, fetch.impl).generateJson({
+      ...request,
+      maxOutputTokens: 12_000,
+    });
+
+    expect(result.output).toEqual({ ok: true });
+    expect(fetch.calls.map((call) => call.body.max_tokens)).toEqual([12_000, 4096]);
+    expect(fetch.calls[1]!.body.response_format).toMatchObject({ type: 'json_schema' });
+  });
+
+  it('adapts to both refusals from an old model version', async () => {
+    const fetch = fakeFetch(
+      json(400, { error: { message: "'response_format' of type 'json_schema' is not supported" } }),
+      json(400, { error: { message: 'This model supports at most 4096 completion tokens.' } }),
+      completion('{"ok":true}'),
+    );
+    const result = await createAzureOpenAiProvider(config, fetch.impl).generateJson({
+      ...request,
+      maxOutputTokens: 12_000,
+    });
+
+    expect(result.responseFormat).toBe('json_object');
+    expect(fetch.calls[2]!.body).toMatchObject({
+      max_tokens: 4096,
+      response_format: { type: 'json_object' },
+    });
+  });
+
   it('reports an unreachable endpoint without leaking the key', async () => {
     const offline = (async () => {
       throw new TypeError('fetch failed');

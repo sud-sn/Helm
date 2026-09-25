@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Card,
   Drawer,
@@ -12,13 +13,16 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
+import { DOC_TYPE_LABELS } from '@helm/shared';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { VisibilityTag } from '@/components/domain-tags';
 import { Markdown } from '@/components/Markdown';
 import { PageHeader } from '@/components/PageHeader';
 import { QueryState } from '@/components/QueryState';
+import { Tag } from '@/components/Tag';
 import { useCurrentUser } from '@/features/auth/api';
 import {
+  pageWordUrl,
   useDeletePage,
   usePage,
   usePageVersions,
@@ -63,58 +67,106 @@ export function PageRoute() {
                   ]
             }
             title={data.title}
-            meta={!clientView ? <VisibilityTag visibility={data.visibility} /> : undefined}
-            description={`Version ${data.version} · updated ${fromNow(data.updatedAt)} by ${data.updatedBy.displayName}${
+            meta={
+              !clientView ? (
+                <Group gap={6}>
+                  <VisibilityTag visibility={data.visibility} />
+                  {data.aiDrafted ? (
+                    <Tag tone="review" icon={ActionIcons.suggest}>
+                      AI draft
+                    </Tag>
+                  ) : null}
+                </Group>
+              ) : undefined
+            }
+            description={`${data.docType ? `${DOC_TYPE_LABELS[data.docType]} · ` : ''}Version ${data.version} · updated ${fromNow(data.updatedAt)} by ${data.updatedBy.displayName}${
               data.ticketKey ? ` · ${data.ticketKey}` : ''
             }`}
             actions={
-              clientView ? undefined : (
-                <>
-                  {permissions.has('content.share') ? (
-                    <Tooltip label="Shared pages appear in the client portal">
-                      <Switch
-                        label="Share with client"
-                        // Show the new position while saving; it falls back if the request fails.
-                        checked={(share.isPending ? share.variables : data.visibility) === 'client'}
-                        disabled={share.isPending}
-                        onChange={(e) =>
-                          share.mutate(e.currentTarget.checked ? 'client' : 'internal', {
-                            onSuccess: (updated) =>
-                              showSuccess(
-                                updated.visibility === 'client'
-                                  ? 'Shared with the client'
-                                  : 'Page is internal again',
-                              ),
-                          })
-                        }
-                      />
-                    </Tooltip>
-                  ) : null}
+              <>
+                <Tooltip label="Download as a Word document">
                   <Button
+                    component="a"
+                    href={pageWordUrl(data.id)}
                     variant="default"
-                    leftSection={<ActionIcons.history size={16} stroke={ICON_STROKE} />}
-                    onClick={history.open}
+                    leftSection={<ActionIcons.downloadWord size={16} stroke={ICON_STROKE} />}
                   >
-                    History
+                    Word
                   </Button>
-                  {permissions.has('page.write') ? (
+                </Tooltip>
+                <Tooltip label="Opens a print view: choose Save as PDF">
+                  <Button
+                    component="a"
+                    href={paths.pagePrint(data.id)}
+                    target="_blank"
+                    rel="noopener"
+                    variant="default"
+                    leftSection={<ActionIcons.downloadPdf size={16} stroke={ICON_STROKE} />}
+                  >
+                    PDF
+                  </Button>
+                </Tooltip>
+                {clientView ? null : (
+                  <>
+                    {permissions.has('content.share') ? (
+                      <Tooltip label="Shared pages appear in the client portal">
+                        <Switch
+                          label="Share with client"
+                          // Show the new position while saving; it falls back if the request fails.
+                          checked={
+                            (share.isPending ? share.variables : data.visibility) === 'client'
+                          }
+                          disabled={share.isPending}
+                          onChange={(e) =>
+                            share.mutate(e.currentTarget.checked ? 'client' : 'internal', {
+                              onSuccess: (updated) =>
+                                showSuccess(
+                                  updated.visibility === 'client'
+                                    ? 'Shared with the client'
+                                    : 'Page is internal again',
+                                ),
+                            })
+                          }
+                        />
+                      </Tooltip>
+                    ) : null}
                     <Button
-                      component={Link}
-                      to={paths.pageEdit(data.id)}
-                      leftSection={<ActionIcons.edit size={16} stroke={ICON_STROKE} />}
+                      variant="default"
+                      leftSection={<ActionIcons.history size={16} stroke={ICON_STROKE} />}
+                      onClick={history.open}
                     >
-                      Edit
+                      History
                     </Button>
-                  ) : null}
-                  {permissions.has('page.delete') ? (
-                    <Button variant="subtle" color="red" onClick={del.open}>
-                      Delete
-                    </Button>
-                  ) : null}
-                </>
-              )
+                    {permissions.has('page.write') ? (
+                      <Button
+                        component={Link}
+                        to={paths.pageEdit(data.id)}
+                        leftSection={<ActionIcons.edit size={16} stroke={ICON_STROKE} />}
+                      >
+                        Edit
+                      </Button>
+                    ) : null}
+                    {permissions.has('page.delete') ? (
+                      <Button variant="subtle" color="red" onClick={del.open}>
+                        Delete
+                      </Button>
+                    ) : null}
+                  </>
+                )}
+              </>
             }
           />
+          {!clientView && data.aiDrafted && data.version === 1 ? (
+            <Alert
+              mb="md"
+              color="violet"
+              icon={<ActionIcons.suggest size={18} stroke={ICON_STROKE} />}
+              title="Written by AI from notes: review it before sharing"
+            >
+              Check every fact against the notes, fill in the lines marked “To confirm”, and tick
+              off the open questions at the end. The page stays internal until someone shares it.
+            </Alert>
+          ) : null}
           <Card>
             {data.body.trim() ? (
               <Markdown>{data.body}</Markdown>

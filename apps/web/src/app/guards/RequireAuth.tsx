@@ -10,8 +10,9 @@ export const homeFor = (userType: UserType) =>
 /**
  * Sends people to the right place: sign-in when there is no session, the password screen when a
  * temporary password must be replaced, and staff/client users to their own part of the app.
+ * Without an audience, any signed-in user may pass (the API still decides what they can read).
  */
-export function RequireAuth({ audience }: { audience: UserType }) {
+export function RequireAuth({ audience }: { audience?: UserType }) {
   const me = useMe();
   const location = useLocation();
   if (me.isPending) return <FullPageLoader />;
@@ -21,6 +22,8 @@ export function RequireAuth({ audience }: { audience: UserType }) {
     return <Navigate to={`${paths.login}?next=${encodeURIComponent(next)}`} replace />;
   }
   if (user.mustChangePassword) return <Navigate to={paths.changePassword} replace />;
-  if (user.userType !== audience) return <Navigate to={homeFor(user.userType)} replace />;
+  if (audience && user.userType !== audience) {
+    return <Navigate to={homeFor(user.userType)} replace />;
+  }
   return <Outlet />;
 }

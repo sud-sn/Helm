@@ -1,6 +1,7 @@
 import { and, desc, eq, type SQL } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import {
+  DOC_TYPE_LABELS,
   formatTicketKey,
   type CreatePageInput,
   type Page,
@@ -11,7 +12,7 @@ import {
   type Visibility,
 } from '@helm/shared';
 import type { Executor } from '../../db/client';
-import { pageVersions, pages, projects, tickets, users } from '../../db/schema';
+import { clients, pageVersions, pages, projects, tickets, users } from '../../db/schema';
 import type { Access } from '../../core/access/access';
 import { usersWithPermissionAt } from '../../core/access/audience';
 import { anyOf, coverageCondition } from '../../core/access/conditions';
@@ -21,6 +22,7 @@ import { badRequest, conflict, notFound } from '../../core/errors';
 import { requiredUserSummary } from '../../core/dto';
 import { notify } from '../notifications/notify';
 import { hasPermissionWithinProject, requireProject } from '../projects/projects.queries';
+import { markdownToDocx } from './docx';
 
 const creator = alias(users, 'page_creator');
 const updater = alias(users, 'page_updater');
@@ -30,7 +32,9 @@ function selectPages(db: Executor) {
     .select({
       page: pages,
       projectKey: projects.key,
+      projectName: projects.name,
       clientId: projects.clientId,
+      clientName: clients.name,
       ticketNumber: tickets.number,
       ticketCycleId: tickets.cycleId,
       createdBy: { id: creator.id, username: creator.username, displayName: creator.displayName },
@@ -38,6 +42,7 @@ function selectPages(db: Executor) {
     })
     .from(pages)
     .innerJoin(projects, eq(projects.id, pages.projectId))
+    .innerJoin(clients, eq(clients.id, projects.clientId))
     .leftJoin(tickets, eq(tickets.id, pages.ticketId))
     .innerJoin(creator, eq(creator.id, pages.createdById))
     .innerJoin(updater, eq(updater.id, pages.updatedById));
@@ -56,6 +61,8 @@ function toSummary(row: PageRow): PageSummary {
     title: row.page.title,
     visibility: row.page.visibility,
     version: row.page.version,
+    docType: row.page.docType,
+    aiDrafted: row.page.aiRunId !== null,
     updatedBy: requiredUserSummary(row.updatedBy),
     updatedAt: row.page.updatedAt.toISOString(),
   };
@@ -65,6 +72,8 @@ function toPage(row: PageRow): Page {
   return {
     ...toSummary(row),
     body: row.page.body,
+    clientName: row.clientName,
+    projectName: row.projectName,
     createdBy: requiredUserSummary(row.createdBy),
     createdAt: row.page.createdAt.toISOString(),
   };
@@ -111,7 +120,7 @@ async function requirePage(ctx: RequestContext, pageId: string): Promise<PageRow
   return row;
 }
 
-async function loadPage(db: Executor, pageId: string): Promise<Page> {
+export async function loadPage(db: Executor, pageId: string): Promise<Page> {
   const [row] = await selectPages(db).where(eq(pages.id, pageId)).limit(1);
   if (!row) throw notFound('Page');
   return toPage(row);
@@ -144,6 +153,39 @@ export async function listTicketPages(
 
 export async function getPage(ctx: RequestContext, pageId: string): Promise<Page> {
   return toPage(await requirePage(ctx, pageId));
+}
+
+/** A file name every operating system accepts, from the page title. */
+function fileName(title: string, extension: string): string {
+  const base = [...title]
+    .map((char) => (char.charCodeAt(0) < 32 ? ' ' : char))
+    .join('')
+    .replace(/[\\/:*?"<>|]+/g, '-')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 120)
+    .replace(/[. ]+$/, '');
+  return `${base || 'page'}.${extension}`;
+}
+
+/** The page as a Word document, for whoever may read it (clients: pages shared with them). */
+export async function exportPageDocx(
+  ctx: RequestContext,
+  pageId: string,
+): Promise<{ fileName: string; data: Buffer }> {
+  const page = await getPage(ctx, pageId);
+  const subtitle = [
+    page.docType ? DOC_TYPE_LABELS[page.docType] : null,
+    `${page.clientName} · ${page.projectName} (${page.projectKey})`,
+    `Version ${page.version}`,
+    page.updatedAt.slice(0, 10),
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  return {
+    fileName: fileName(page.title, 'docx'),
+    data: await markdownToDocx({ title: page.title, subtitle, markdown: page.body }),
+  };
 }
 
 /** Validates a ticket link and returns the scope the page will live in. */

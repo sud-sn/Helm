@@ -36,6 +36,8 @@ import {
   IconFileExport,
   IconFileImport,
   IconFileText,
+  IconFileTypeDocx,
+  IconFileTypePdf,
   IconFilter,
   IconFlagCheck,
   IconFolders,
@@ -60,6 +62,7 @@ import {
   IconPlayerPlay,
   IconPlus,
   IconPresentation,
+  IconPrinter,
   IconProgress,
   IconRefresh,
   IconSchema,
@@ -165,6 +168,9 @@ export const ActionIcons = {
   requestChanges: IconArrowBackUp,
   /** Anything AI proposes; always shown with its label or a tooltip. */
   suggest: IconSparkles,
+  downloadWord: IconFileTypeDocx,
+  downloadPdf: IconFileTypePdf,
+  print: IconPrinter,
 } satisfies Record<string, AppIcon>;
 
 export const StatusIcons: Record<TicketStatus, AppIcon> = {

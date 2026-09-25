@@ -163,12 +163,31 @@ export const ACTION_ITEM_SOURCES = ['manual', 'ai'] as const;
 export type ActionItemSource = (typeof ACTION_ITEM_SOURCES)[number];
 
 /** What an AI call was for; every call is recorded (see the AI assistant admin page). */
-export const AI_TASKS = ['meeting_action_items', 'connection_test'] as const;
+export const AI_TASKS = ['meeting_action_items', 'page_draft', 'connection_test'] as const;
 export type AiTask = (typeof AI_TASKS)[number];
 
 export const AI_TASK_LABELS: Record<AiTask, string> = {
   meeting_action_items: 'Action items from a transcript',
+  page_draft: 'Document draft',
   connection_test: 'Connection test',
+};
+
+/** Documents the AI can draft from a developer's notes. Their sections are fixed in the API. */
+export const DOC_TYPES = ['technical_spec', 'delivery_document'] as const;
+export type DocType = (typeof DOC_TYPES)[number];
+
+export const DOC_TYPE_LABELS: Record<DocType, string> = {
+  technical_spec: 'Technical specification',
+  delivery_document: 'Delivery document',
+};
+
+export const DOC_TYPE_DESCRIPTIONS: Record<DocType, string> = {
+  technical_spec:
+    'How a pipeline, data model or report is built: sources, target, transformations, ' +
+    'schedule, data quality, reporting, security, testing and deployment.',
+  delivery_document:
+    'What a cycle or release delivered: scope, changes, deployment, validation and UAT, ' +
+    'known issues, support and sign-off.',
 };
 
 export const AI_RUN_STATUSES = ['succeeded', 'failed'] as const;

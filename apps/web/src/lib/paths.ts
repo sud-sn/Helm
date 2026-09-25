@@ -16,6 +16,8 @@ export const paths = {
   meeting: (id: string) => `/meetings/${id}`,
   page: (id: string) => `/pages/${id}`,
   pageEdit: (id: string) => `/pages/${id}/edit`,
+  /** A page on its own, laid out for printing or saving as PDF (staff and clients). */
+  pagePrint: (id: string) => `/print/pages/${id}`,
   adminUsers: '/admin/users',
   adminUser: (id: string) => `/admin/users/${id}`,
   adminAudit: '/admin/audit',

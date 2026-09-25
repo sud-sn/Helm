@@ -2,7 +2,9 @@ import { Anchor, Card, Group, Table, Text } from '@mantine/core';
 import { Link } from 'react-router';
 import type { PageSummary } from '@helm/shared';
 import { VisibilityTag } from '@/components/domain-tags';
+import { Tag } from '@/components/Tag';
 import { TicketKey } from '@/components/TicketKey';
+import { ActionIcons } from '@/icons';
 import { fromNow } from '@/lib/format';
 
 export function PageList({
@@ -32,6 +34,11 @@ export function PageList({
                     </Text>
                     {page.ticketKey ? (
                       <TicketKey ticketKey={page.ticketKey} link={showVisibility} />
+                    ) : null}
+                    {showVisibility && page.aiDrafted ? (
+                      <Tag tone="review" icon={ActionIcons.suggest}>
+                        AI draft
+                      </Tag>
                     ) : null}
                   </Group>
                 </Table.Td>

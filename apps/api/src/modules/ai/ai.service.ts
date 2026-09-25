@@ -8,7 +8,7 @@ import { recordAudit } from '../../core/audit';
 import type { RequestContext } from '../../core/context';
 import { userSummary } from '../../core/dto';
 import { HttpError, badRequest, conflict } from '../../core/errors';
-import { aiRuns, aiSettings, meetings, users } from '../../db/schema';
+import { aiRuns, aiSettings, meetings, pages, users } from '../../db/schema';
 
 const TEST_PROMPT_VERSION = 'connection-test/1';
 
@@ -24,13 +24,15 @@ async function recentRuns(ctx: RequestContext): Promise<AiRun[]> {
       run: aiRuns,
       requestedBy: { id: users.id, username: users.username, displayName: users.displayName },
       meetingTitle: meetings.title,
+      draftedPage: { id: pages.id, title: pages.title },
     })
     .from(aiRuns)
     .leftJoin(users, eq(users.id, aiRuns.requestedById))
     .leftJoin(meetings, eq(meetings.id, aiRuns.meetingId))
+    .leftJoin(pages, eq(pages.aiRunId, aiRuns.id))
     .orderBy(desc(aiRuns.createdAt))
     .limit(50);
-  return rows.map(({ run, requestedBy, meetingTitle }) => ({
+  return rows.map(({ run, requestedBy, meetingTitle, draftedPage }) => ({
     id: run.id,
     task: run.task,
     model: run.model,
@@ -39,6 +41,7 @@ async function recentRuns(ctx: RequestContext): Promise<AiRun[]> {
     errorKind: run.errorKind,
     requestedBy: userSummary(requestedBy),
     meeting: run.meetingId && meetingTitle ? { id: run.meetingId, title: meetingTitle } : null,
+    page: draftedPage?.id ? { id: draftedPage.id, title: draftedPage.title } : null,
     inputTokens: run.inputTokens,
     outputTokens: run.outputTokens,
     durationMs: run.durationMs,

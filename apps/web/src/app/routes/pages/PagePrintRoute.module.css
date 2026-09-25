@@ -1,0 +1,59 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mantine-spacing-sm);
+  padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
+  border-bottom: 1px solid var(--mantine-color-default-border);
+  background: var(--mantine-color-body);
+}
+
+.document {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 40px 32px 64px;
+}
+
+.meta {
+  margin-bottom: var(--mantine-spacing-lg);
+  padding-bottom: var(--mantine-spacing-sm);
+  border-bottom: 1px solid var(--mantine-color-default-border);
+}
+
+/* Wide tables wrap onto the page instead of running off its edge. */
+.document table {
+  width: 100%;
+  table-layout: auto;
+}
+
+.document td,
+.document th {
+  overflow-wrap: anywhere;
+}
+
+@media print {
+  @page {
+    margin: 18mm 16mm;
+  }
+
+  .toolbar {
+    display: none;
+  }
+
+  .document {
+    max-width: none;
+    padding: 0;
+  }
+
+  .document h2,
+  .document h3 {
+    break-after: avoid;
+  }
+
+  .document tr,
+  .document pre,
+  .document blockquote {
+    break-inside: avoid;
+  }
+}

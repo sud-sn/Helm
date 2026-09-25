@@ -162,45 +162,50 @@ export function createAzureOpenAiProvider(
 
     async generateJson(request: GenerateJsonRequest): Promise<GenerateJsonResult> {
       const started = Date.now();
-      const deadline = started + config.timeoutMs;
-      const settings = {
-        temperature: request.temperature ?? 0.2,
-        max_tokens: request.maxOutputTokens ?? 2000,
-      };
+      const deadline = started + Math.max(request.timeoutMs ?? 0, config.timeoutMs);
       let responseFormat: GenerateJsonResult['responseFormat'] = 'json_schema';
-      let reply = await post(
-        {
-          ...settings,
-          messages: [
-            { role: 'system', content: request.system },
-            { role: 'user', content: request.user },
-          ],
-          response_format: {
-            type: 'json_schema',
-            json_schema: { name: request.schemaName, strict: true, schema: request.schema },
-          },
-        },
-        deadline,
-      );
-      const message = azureError(reply.body).message ?? '';
-      if (reply.status === 400 && message.toLowerCase().includes('response_format')) {
-        responseFormat = 'json_object';
-        reply = await post(
-          {
-            ...settings,
-            messages: [
-              {
-                role: 'system',
-                content:
-                  `${request.system}\n\nReply with one JSON object that matches this JSON ` +
-                  `Schema:\n${JSON.stringify(request.schema)}`,
+      let maxTokens = request.maxOutputTokens ?? 2000;
+      const body = () => ({
+        temperature: request.temperature ?? 0.2,
+        max_tokens: maxTokens,
+        ...(responseFormat === 'json_schema'
+          ? {
+              messages: [
+                { role: 'system', content: request.system },
+                { role: 'user', content: request.user },
+              ],
+              response_format: {
+                type: 'json_schema',
+                json_schema: { name: request.schemaName, strict: true, schema: request.schema },
               },
-              { role: 'user', content: request.user },
-            ],
-            response_format: { type: 'json_object' },
-          },
-          deadline,
-        );
+            }
+          : {
+              messages: [
+                {
+                  role: 'system',
+                  content:
+                    `${request.system}\n\nReply with one JSON object that matches this JSON ` +
+                    `Schema:\n${JSON.stringify(request.schema)}`,
+                },
+                { role: 'user', content: request.user },
+              ],
+              response_format: { type: 'json_object' },
+            }),
+      });
+      let reply = await post(body(), deadline);
+      // Older model versions refuse structured outputs, or allow fewer output tokens (4,096 for
+      // gpt-4o 2024-05-13). Each refusal names the problem; adapt once to each and ask again.
+      for (let adjustments = 0; reply.status === 400 && adjustments < 2; adjustments++) {
+        const message = azureError(reply.body).message ?? '';
+        const tokenLimit = /at most (\d+) completion tokens/i.exec(message);
+        if (responseFormat === 'json_schema' && message.toLowerCase().includes('response_format')) {
+          responseFormat = 'json_object';
+        } else if (tokenLimit && Number(tokenLimit[1]) < maxTokens) {
+          maxTokens = Number(tokenLimit[1]);
+        } else {
+          break;
+        }
+        reply = await post(body(), deadline);
       }
       if (reply.status !== 200) throw failure(reply);
 

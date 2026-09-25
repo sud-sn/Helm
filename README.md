@@ -76,25 +76,34 @@ container: the portal makes no requests to third parties. Other settings are lis
 
 ## AI assistant (Azure OpenAI)
 
-Helm can suggest a meeting's action items from its transcript using your Azure OpenAI deployment
-(GPT-4o). To switch it on, sign in as an administrator, open **Administration → AI assistant**, and
-enter the endpoint, the deployment name and the API key (Azure portal → your resource → Keys and
-Endpoint). **Save and test** sends Azure a short test request and saves the settings only if it
-works. No restart is needed. After that, a meeting's **Action items** tab has a **Suggest from
-transcript** button.
+Helm uses your Azure OpenAI deployment (GPT-4o) to suggest a meeting's action items from its
+transcript, and to write technical specifications and delivery documents from a developer's notes.
+To switch it on, sign in as an administrator, open **Administration → AI assistant**, and enter the
+endpoint, the deployment name and the API key (Azure portal → your resource → Keys and Endpoint).
+**Save and test** sends Azure a short test request and saves the settings only if it works. No
+restart is needed. After that, a meeting's **Action items** tab has a **Suggest from transcript**
+button, and **New page** in a project offers **Write with AI**.
 
 - **The key stays protected.** It is stored encrypted (AES-256-GCM) and never shown again, only its
   last four characters. The encryption key is a secret the server generates on first start in its
   data folder (the `helm-data` volume in Docker), outside the database: back it up together with
   the database, or set `HELM_SECRET_KEY` to manage it yourself. If it is lost, enter the API key
   again.
-- **What is sent**, and only to your own Azure resource: the meeting's transcript, title, date and
-  attendees, the usernames of the project's members, and the meeting's existing action items.
+- **What is sent**, and only to your own Azure resource: for action items, the meeting's
+  transcript, title, date and attendees, the usernames of the project's members, and the meeting's
+  existing action items; for a document, the developer's notes and the cycle, tickets, meetings and
+  pages they chose to include (only what they can see themselves).
 - **Nothing is automatic.** Each suggestion shows the transcript quote it came from and must be
   accepted by a person before it can become a ticket. Suggestions whose quote is not in the
-  transcript are dropped.
+  transcript are dropped. A document draft follows fixed sections, marks every missing fact "To
+  confirm" and lists open questions; it is saved as an internal page that someone reviews before
+  sharing ([ADR 0007](docs/adr/0007-ai-document-drafts-and-exports.md)).
 - **Everything is logged.** Every AI request (who, model, tokens, time, outcome) is listed on the AI
   assistant page, and saving or removing the connection is in the audit log.
+
+Every page, AI-drafted or not, has **Word** and **PDF** buttons: Word downloads a .docx built on the
+server, and PDF opens a print view where the browser's **Save as PDF** keeps the page as shown.
+Clients can download pages shared with them.
 
 For automated deployments you can set `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY` and
 `AZURE_OPENAI_DEPLOYMENT` as environment variables instead; the AI assistant page then shows them

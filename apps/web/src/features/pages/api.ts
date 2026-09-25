@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   CreatePageInput,
+  DraftPageInput,
+  DraftPageResult,
   Page,
   PageSummary,
   PageVersion,
@@ -52,6 +54,20 @@ export function useCreatePage(projectKey: string) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: pageKeys.all }),
   });
 }
+
+/** The AI writes a document from a developer's notes; it arrives as a new internal page. */
+export function useDraftPage(projectKey: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: DraftPageInput) =>
+      api<DraftPageResult>(`/projects/${projectKey}/pages/draft`, { method: 'POST', body: input }),
+    meta: { silent: true },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: pageKeys.all }),
+  });
+}
+
+/** The page as a Word document; a plain link, so the browser downloads it with the session. */
+export const pageWordUrl = (id: string) => `/api/pages/${id}/export.docx`;
 
 export function useUpdatePage(id: string) {
   const queryClient = useQueryClient();

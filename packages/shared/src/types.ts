@@ -7,6 +7,7 @@ import type {
   AiRunStatus,
   AiTask,
   CycleStatus,
+  DocType,
   NotificationType,
   PitchStatus,
   ProjectStatus,
@@ -219,14 +220,27 @@ export interface PageSummary {
   title: string;
   visibility: Visibility;
   version: number;
+  /** Set when the page was drafted by the AI as one of the fixed document types. */
+  docType: DocType | null;
+  aiDrafted: boolean;
   updatedBy: UserSummary;
   updatedAt: string;
 }
 
 export interface Page extends PageSummary {
   body: string;
+  /** Client and project names, for downloads and printing. */
+  clientName: string;
+  projectName: string;
   createdBy: UserSummary;
   createdAt: string;
+}
+
+export interface DraftPageResult {
+  page: Page;
+  model: string;
+  /** Facts the AI could not find in the notes; also listed at the end of the page. */
+  openQuestions: string[];
 }
 
 export interface PageVersion {
@@ -340,6 +354,7 @@ export interface AiRun {
   errorKind: string | null;
   requestedBy: UserSummary | null;
   meeting: { id: string; title: string } | null;
+  page: { id: string; title: string } | null;
   inputTokens: number;
   outputTokens: number;
   durationMs: number;

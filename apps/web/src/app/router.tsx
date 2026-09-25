@@ -16,6 +16,18 @@ export const router = createBrowserRouter([
   { path: '/login', Component: LoginRoute, ErrorBoundary: RouteErrorBoundary },
   { path: '/change-password', Component: ChangePasswordRoute, ErrorBoundary: RouteErrorBoundary },
   {
+    // Print views for staff and clients alike, without the app around them.
+    path: '/print',
+    element: <RequireAuth />,
+    ErrorBoundary: RouteErrorBoundary,
+    children: [
+      {
+        path: 'pages/:pageId',
+        lazy: screen(() => import('./routes/pages/PagePrintRoute'), 'PagePrintRoute'),
+      },
+    ],
+  },
+  {
     element: <RequireAuth audience="staff" />,
     ErrorBoundary: RouteErrorBoundary,
     children: [

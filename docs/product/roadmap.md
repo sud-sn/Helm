@@ -37,8 +37,10 @@ AI sits behind a provider interface ([ADR 0006](../adr/0006-llm-provider-abstrac
 
 - **Built (Azure OpenAI, GPT-4o):** MOM extraction — "Suggest from transcript" fills a meeting's
   action items, each with its source quote; people accept or dismiss them in the action-item list.
-- Auto-documentation: draft a Page from a developer's notes plus the ticket's context; the author
-  edits and publishes.
+- **Built:** document drafts — "Write with AI" turns a developer's notes, plus a cycle, tickets,
+  meetings or pages they pick, into a technical specification or delivery document in fixed
+  sections, saved as an internal page to review ([ADR 0007](../adr/0007-ai-document-drafts-and-exports.md)).
+  Every page downloads as Word or PDF.
 - Knowledge search over pages, tickets and minutes, filtered by what the user can see.
 - Client status-report drafts, duplicate detection, follow-ups across meetings.
 

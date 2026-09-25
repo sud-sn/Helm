@@ -25,6 +25,7 @@ const ACTIONS = [
   'tickets.imported',
   'page.deleted',
   'page.visibility_changed',
+  'page.drafted_with_ai',
   'meeting.deleted',
   'meeting.visibility_changed',
   'meeting.action_items_suggested',

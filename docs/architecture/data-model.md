@@ -43,4 +43,6 @@ audit_log (append-only)
   AI assistant page. The API key is stored encrypted (`api_key_encrypted`, AES-256-GCM) and only
   its last four characters (`api_key_hint`) are readable.
 - **Pages** store the current version inline and every version in `page_versions`; saves use
-  optimistic concurrency (`expectedVersion`).
+  optimistic concurrency (`expectedVersion`). A page the AI drafted records its document type
+  (`doc_type`: `technical_spec` or `delivery_document`) and the run that wrote it (`ai_run_id`);
+  its first version is the draft exactly as written.

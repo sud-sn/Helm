@@ -303,6 +303,11 @@ function RecentRequests({ runs }: { runs: AiRun[] }) {
                         {run.meeting.title}
                       </Anchor>
                     ) : null}
+                    {run.page ? (
+                      <Anchor component={Link} to={paths.page(run.page.id)} size="xs">
+                        {run.page.title}
+                      </Anchor>
+                    ) : null}
                   </Table.Td>
                   <Table.Td>
                     <UserLabel user={run.requestedBy} fallback="—" />
@@ -340,7 +345,7 @@ export function AiRoute() {
     <>
       <PageHeader
         title="AI assistant"
-        description="Helm uses your Azure OpenAI deployment to suggest action items from meeting transcripts. People review every suggestion before it becomes a ticket."
+        description="Helm uses your Azure OpenAI deployment to suggest action items from meeting transcripts and to draft technical and delivery documents. People review everything it writes before it becomes a ticket or reaches a client."
       />
       <QueryState query={status}>
         {(data) => (

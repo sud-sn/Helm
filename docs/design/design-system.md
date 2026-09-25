@@ -173,18 +173,19 @@ requests to third parties. Tables and numeric columns use `tabular-nums`.
 - **Icons never stand alone.** An icon-only button has a tooltip and an `aria-label`; state icons
   sit next to their label.
 
-| Concept       | Icon                     | Concept         | Icon                                |
-| ------------- | ------------------------ | --------------- | ----------------------------------- |
-| Dashboard     | `IconLayoutDashboard`    | Board           | `IconLayoutKanban`                  |
-| My work       | `IconChecklist`          | Backlog         | `IconInbox`                         |
-| Clients       | `IconBuildingSkyscraper` | Cycles          | `IconRefresh`                       |
-| Projects      | `IconFolders`            | Tickets (list)  | `IconListDetails`                   |
-| Pages         | `IconFileText`           | Meetings        | `IconMessages`                      |
-| Pitches       | `IconPresentation`       | Members         | `IconUsers`                         |
-| Notifications | `IconBell`               | Administration  | `IconShieldLock`                    |
-| Audit log     | `IconHistory`            | Import / Export | `IconFileImport` / `IconFileExport` |
-| Transcript    | `IconMicrophone`         | Action item     | `IconCheckupList`                   |
-| AI suggestion | `IconSparkles`           |                 |                                     |
+| Concept       | Icon                     | Concept         | Icon                                   |
+| ------------- | ------------------------ | --------------- | -------------------------------------- |
+| Dashboard     | `IconLayoutDashboard`    | Board           | `IconLayoutKanban`                     |
+| My work       | `IconChecklist`          | Backlog         | `IconInbox`                            |
+| Clients       | `IconBuildingSkyscraper` | Cycles          | `IconRefresh`                          |
+| Projects      | `IconFolders`            | Tickets (list)  | `IconListDetails`                      |
+| Pages         | `IconFileText`           | Meetings        | `IconMessages`                         |
+| Pitches       | `IconPresentation`       | Members         | `IconUsers`                            |
+| Notifications | `IconBell`               | Administration  | `IconShieldLock`                       |
+| Audit log     | `IconHistory`            | Import / Export | `IconFileImport` / `IconFileExport`    |
+| Transcript    | `IconMicrophone`         | Action item     | `IconCheckupList`                      |
+| AI suggestion | `IconSparkles`           | Word / PDF      | `IconFileTypeDocx` / `IconFileTypePdf` |
+| Print         | `IconPrinter`            |                 |                                        |
 
 ## Accessibility checklist
 

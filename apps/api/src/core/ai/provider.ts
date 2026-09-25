@@ -13,8 +13,11 @@ export interface GenerateJsonRequest {
   /** Instructions. Untrusted text (a transcript) belongs in `user`, never here. */
   system: string;
   user: string;
+  /** Upper limit; lowered automatically for model versions that allow less. */
   maxOutputTokens?: number;
   temperature?: number;
+  /** Time a long answer (a document) needs. Never below the configured AI timeout. */
+  timeoutMs?: number;
 }
 
 export interface GenerateJsonResult {

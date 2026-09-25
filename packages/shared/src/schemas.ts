@@ -5,6 +5,7 @@
 import { z } from 'zod';
 import {
   CYCLE_STATUSES,
+  DOC_TYPES,
   PITCH_RESPONSES,
   PROJECT_STATUSES,
   TICKET_PRIORITIES,
@@ -290,6 +291,24 @@ export const updatePageSchema = z.object({
   expectedVersion: z.number().int().min(1),
 });
 export type UpdatePageInput = z.infer<typeof updatePageSchema>;
+
+/** A document the AI writes from a developer's notes, optionally with project context. */
+export const draftPageSchema = z.object({
+  docType: z.enum(DOC_TYPES),
+  /** Empty: the AI suggests one. */
+  title: z.string().trim().max(200).default(''),
+  brief: z
+    .string()
+    .trim()
+    .min(40, 'Describe it in a few sentences (at least 40 characters)')
+    .max(20000),
+  /** Include this cycle and its tickets. */
+  cycleId: idSchema.nullish(),
+  ticketKeys: z.array(z.string().trim().min(3).max(24)).max(30).default([]),
+  meetingIds: z.array(idSchema).max(5).default([]),
+  pageIds: z.array(idSchema).max(5).default([]),
+});
+export type DraftPageInput = z.input<typeof draftPageSchema>;
 
 /** Share with the client or make internal again (pages and meeting minutes). */
 export const visibilitySchemaInput = z.object({
