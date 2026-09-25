@@ -294,7 +294,9 @@ describe('AI administration', () => {
       meeting: { id: meeting.id, title: 'Sales mart kickoff' },
       requestedBy: { username: 'dev' },
     });
-    expect(JSON.stringify(status.body)).not.toContain('key');
+    // Configured by the environment here: read-only, and nothing about the key is sent.
+    expect(status.body).toMatchObject({ source: 'environment', editable: false, keyHint: null });
+    expect(JSON.stringify(status.body)).not.toMatch(/apiKey|api-key/i);
     expect((await dev.get('/api/admin/ai')).status).toBe(403);
   });
 
@@ -312,7 +314,7 @@ describe('AI administration', () => {
     ai.answer(() => {
       throw new AiProviderError(
         'auth',
-        'Azure OpenAI rejected the API key. Check AZURE_OPENAI_API_KEY.',
+        'Azure OpenAI rejected the API key. Use KEY 1 or KEY 2 of this resource.',
         401,
       );
     });

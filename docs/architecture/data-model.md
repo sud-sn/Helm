@@ -17,6 +17,7 @@ clients ──< projects ──< cycles
                ├──< pages ──< page_versions        (optional link to a ticket)
 clients ──< meetings ──< meeting_action_items ──> tickets | pitches | ai_runs
 ai_runs >── meetings, users                         (one row per AI call)
+ai_settings                                         (one row: the Azure OpenAI connection)
 clients ──< pitches ──< pitch_comments             (optional link to a project)
 
 audit_log (append-only)
@@ -38,5 +39,8 @@ audit_log (append-only)
   tokens, duration, outcome and requester. Action items carry `source` (`manual` | `ai`),
   `source_quote` and `ai_run_id`; AI items start as `suggested` and a person moves them to `open`
   or `dismissed`. Only `open` items can become tickets.
+- **AI settings** (`ai_settings`) hold at most one row: the Azure OpenAI connection saved on the
+  AI assistant page. The API key is stored encrypted (`api_key_encrypted`, AES-256-GCM) and only
+  its last four characters (`api_key_hint`) are readable.
 - **Pages** store the current version inline and every version in `page_versions`; saves use
   optimistic concurrency (`expectedVersion`).

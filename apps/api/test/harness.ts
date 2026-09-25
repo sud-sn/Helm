@@ -4,7 +4,7 @@ import pg from 'pg';
 import type { Role, ScopeType, UserType } from '@helm/shared';
 import { buildApp } from '../src/app';
 import { loadConfig, type Config } from '../src/config/env';
-import type { LlmProvider } from '../src/core/ai';
+import type { LlmProvider, ProviderFactory } from '../src/core/ai';
 import { createDatabase, type Database } from '../src/db/client';
 import { clients, cycles, projects, roleAssignments, users } from '../src/db/schema';
 import { hashPassword } from '../src/core/security/password';
@@ -46,12 +46,14 @@ export interface TestApp {
 
 /**
  * A fresh app on a private copy of the migrated template database. AI is off unless a provider
- * (usually a fake) is passed.
+ * (usually a fake) is passed; passing `createAiProvider` instead uses the settings administrators
+ * save, with providers built by that (fake) factory.
  */
 export async function createTestApp(
   env: Record<string, string> = {},
-  { ai = null }: { ai?: LlmProvider | null } = {},
+  options: { ai?: LlmProvider | null; createAiProvider?: ProviderFactory } = {},
 ): Promise<TestApp> {
+  const ai = options.createAiProvider ? undefined : (options.ai ?? null);
   const database = `${TEST_DATABASE_PREFIX}${randomUUID().replace(/-/g, '').slice(0, 16)}`;
   await maintenanceQuery(`create database "${database}" template "${TEMPLATE_DATABASE}"`);
   const url = withDatabase(TEST_DATABASE_URL, database);
@@ -62,9 +64,15 @@ export async function createTestApp(
     DATABASE_URL: url,
     PASSWORD_HASH_COST: '10',
     LOGIN_RATE_LIMIT_PER_MINUTE: '10000',
+    HELM_SECRET_KEY: 'test-server-secret-for-integration-tests-only',
     ...env,
   });
-  const app = await buildApp({ db: handle.db, config, ai });
+  const app = await buildApp({
+    db: handle.db,
+    config,
+    ai,
+    createAiProvider: options.createAiProvider,
+  });
   await app.ready();
   return {
     app,

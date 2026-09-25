@@ -124,7 +124,7 @@ export async function suggestActionItems(
   const meeting = await requireStaffMeeting(ctx, meetingId);
   const scope = meetingScope(meeting);
   ctx.access.require('meeting.write', scope, 'You cannot edit this meeting.');
-  const ai = ctx.ai;
+  const ai = await ctx.ai.provider();
   if (!ai) throw aiNotConfigured();
   const transcript = meeting.meeting.transcript.trim();
   if (!transcript) throw new HttpError(400, 'NO_TRANSCRIPT', 'Add the meeting transcript first.');

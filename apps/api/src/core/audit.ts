@@ -23,6 +23,8 @@ export type AuditAction =
   | 'meeting.deleted'
   | 'meeting.visibility_changed'
   | 'meeting.action_items_suggested'
+  | 'ai.settings_saved'
+  | 'ai.settings_removed'
   | 'pitch.sent'
   | 'pitch.responded'
   | 'pitch.withdrawn';

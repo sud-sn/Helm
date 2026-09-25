@@ -9,3 +9,5 @@ coverage/
 playwright-report/
 test-results/
 *.tsbuildinfo
+# The server's own files, including its generated secret key: never commit them.
+/data/

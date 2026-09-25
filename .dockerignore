@@ -3,6 +3,7 @@
 **/coverage
 **/*.log
 **/*.tsbuildinfo
+data
 .git
 .github
 .env

@@ -31,9 +31,13 @@ services:
       AZURE_OPENAI_API_VERSION: ${AZURE_OPENAI_API_VERSION:-2024-10-21}
     ports:
       - '3000:3000'
+    volumes:
+      # The server's generated secret key, which protects keys saved on the AI assistant page.
+      - helm-data:/app/data
     depends_on:
       db:
         condition: service_healthy
 
 volumes:
   helm-db:
+  helm-data:

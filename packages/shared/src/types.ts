@@ -346,13 +346,25 @@ export interface AiRun {
   createdAt: string;
 }
 
-/** The administrator's view of the AI connection. The API key is never sent. */
+/** The administrator's view of the AI connection. The API key itself is never sent. */
 export interface AiStatus {
   enabled: boolean;
   provider: 'azure-openai' | null;
+  /** environment: set by the server's environment variables (read-only here); admin: saved here. */
+  source: 'environment' | 'admin' | null;
+  /** False when environment variables configure AI: the settings form is then read-only. */
+  editable: boolean;
+  /** The saved endpoint URL (not secret), to fill in the form. */
+  endpoint: string | null;
   endpointHost: string | null;
   deployment: string | null;
   apiVersion: string | null;
+  /** The last four characters of the saved key, to recognise it. */
+  keyHint: string | null;
+  updatedAt: string | null;
+  updatedBy: UserSummary | null;
+  /** Why saved settings cannot be used right now, e.g. the server secret changed. */
+  problem: string | null;
   recentRuns: AiRun[];
 }
 

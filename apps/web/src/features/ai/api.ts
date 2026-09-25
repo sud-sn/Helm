@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { AiStatus, AiTestResult, Features } from '@helm/shared';
+import type { AiSettingsInput, AiStatus, AiTestResult, Features } from '@helm/shared';
 import { api } from '@/lib/api-client';
 
 export const aiKeys = {
@@ -18,6 +18,35 @@ export function useFeatures() {
 
 export function useAiStatus() {
   return useQuery({ queryKey: aiKeys.status, queryFn: () => api<AiStatus>('/admin/ai') });
+}
+
+function useApplyStatus() {
+  const queryClient = useQueryClient();
+  return (status: AiStatus) => {
+    queryClient.setQueryData(aiKeys.status, status);
+    // The admin's own screens show or hide AI buttons from this.
+    void queryClient.invalidateQueries({ queryKey: aiKeys.features });
+  };
+}
+
+/** Tests the connection with these settings on the server and saves them only if it works. */
+export function useSaveAiSettings() {
+  const apply = useApplyStatus();
+  return useMutation({
+    mutationFn: (input: AiSettingsInput) =>
+      api<AiStatus>('/admin/ai/settings', { method: 'PUT', body: input }),
+    // The form shows what went wrong next to the fields.
+    meta: { silent: true },
+    onSuccess: apply,
+  });
+}
+
+export function useRemoveAiSettings() {
+  const apply = useApplyStatus();
+  return useMutation({
+    mutationFn: () => api<AiStatus>('/admin/ai/settings', { method: 'DELETE' }),
+    onSuccess: apply,
+  });
 }
 
 export function useTestAiConnection() {

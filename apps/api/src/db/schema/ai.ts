@@ -1,6 +1,7 @@
-import { check, index, integer, jsonb, pgTable, text, uuid } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
+import { check, index, integer, jsonb, pgTable, smallint, text, uuid } from 'drizzle-orm/pg-core';
 import { AI_RUN_STATUSES, AI_TASKS } from '@helm/shared';
-import { createdAt, id, oneOf } from './_helpers';
+import { createdAt, id, oneOf, updatedAt } from './_helpers';
 import { meetings } from './meetings';
 import { users } from './users';
 
@@ -35,4 +36,24 @@ export const aiRuns = pgTable(
     check('ai_runs_task_check', oneOf(t.task, AI_TASKS)),
     check('ai_runs_status_check', oneOf(t.status, AI_RUN_STATUSES)),
   ],
+);
+
+/**
+ * The Azure OpenAI connection an administrator entered on the AI assistant page (one row at most).
+ * The key is stored encrypted (see core/security/secrets.ts) and is never sent to a browser; only
+ * its last four characters are kept readable, to recognise it.
+ */
+export const aiSettings = pgTable(
+  'ai_settings',
+  {
+    id: smallint('id').primaryKey().default(1),
+    endpoint: text('endpoint').notNull(),
+    deployment: text('deployment').notNull(),
+    apiVersion: text('api_version').notNull(),
+    apiKeyEncrypted: text('api_key_encrypted').notNull(),
+    apiKeyHint: text('api_key_hint').notNull(),
+    updatedById: uuid('updated_by_id').references(() => users.id, { onDelete: 'set null' }),
+    updatedAt: updatedAt(),
+  },
+  (t) => [check('ai_settings_single_row', sql`${t.id} = 1`)],
 );

@@ -19,8 +19,13 @@ durationMs, responseFormat }` in `apps/api/src/core/ai/`. Features never call Az
   server environment. It asks for structured outputs (a JSON Schema the model must follow); GPT-4o
   versions older than 2024-08-06 fall back to JSON mode. Rate limits are retried as Azure's
   `retry-after` headers ask, within a deadline per call.
-- AI is off unless `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY` and `AZURE_OPENAI_DEPLOYMENT`
-  are all set. The key is never logged, stored in the database or sent to a browser.
+- AI is off until an administrator connects Azure OpenAI on the AI assistant page (endpoint,
+  deployment, API key). Settings are saved only after a test request succeeds, and apply without a
+  restart. The key is stored encrypted with AES-256-GCM under a key derived from the server
+  secret, which lives outside the database (`HELM_SECRET_KEY`, or a file the server generates in
+  its data folder). It is never logged or sent back to a browser; only its last four characters
+  are shown. Environment variables (`AZURE_OPENAI_*`) can configure the connection instead, and
+  then take precedence and make the page read-only.
 - Every call is recorded in `ai_runs`: task, model, prompt version, tokens, duration, outcome and
   who asked. Inputs are not copied there.
 - AI output is a suggestion. It is validated against a schema, checked against its source (each

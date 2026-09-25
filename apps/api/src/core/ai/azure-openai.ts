@@ -108,7 +108,7 @@ export function createAzureOpenAiProvider(
     if (reply.status === 401 || reply.status === 403) {
       return new AiProviderError(
         'auth',
-        'Azure OpenAI rejected the API key. Check AZURE_OPENAI_API_KEY.',
+        'Azure OpenAI rejected the API key. Use KEY 1 or KEY 2 of this resource.',
         reply.status,
       );
     }
@@ -116,7 +116,7 @@ export function createAzureOpenAiProvider(
       return new AiProviderError(
         'not_found',
         `Azure OpenAI at ${host} has no deployment "${config.deployment}" for API version ` +
-          `${config.apiVersion}. Check AZURE_OPENAI_DEPLOYMENT and AZURE_OPENAI_API_VERSION.`,
+          `${config.apiVersion}. Check the deployment name and API version.`,
         404,
       );
     }

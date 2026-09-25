@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { normalizeAzureEndpoint } from '../core/ai/endpoint';
 
 const flag = z
   .enum(['true', 'false', '1', '0'])
@@ -28,6 +29,12 @@ const envSchema = z.object({
   HELM_ADMIN_DISPLAY_NAME: z.string().trim().min(1).default('Administrator'),
   HELM_ADMIN_PASSWORD: optionalText,
   WEB_DIST_DIR: optionalText,
+  /** Protects secrets stored in the database. Optional: one is generated in HELM_DATA_DIR. */
+  HELM_SECRET_KEY: optionalText.refine(
+    (value) => value === undefined || value.length >= 32,
+    'Use at least 32 characters',
+  ),
+  HELM_DATA_DIR: optionalText,
   LOGIN_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().min(1).default(20),
   LOCKOUT_THRESHOLD: z.coerce.number().int().min(1).default(5),
   LOCKOUT_MINUTES: z.coerce.number().int().min(1).default(15),
@@ -72,8 +79,16 @@ export interface Config {
   lockoutThreshold: number;
   lockoutMinutes: number;
   passwordHashCost: number;
-  /** null when Azure OpenAI is not configured: AI features are then switched off. */
+  /**
+   * Azure OpenAI from environment variables. null when they are not set: an administrator can
+   * then connect Azure OpenAI from the AI assistant page instead.
+   */
   ai: AiConfig | null;
+  aiTimeoutMs: number;
+  /** Protects secrets stored in the database; generated in dataDir when not set. */
+  secretKey: string | undefined;
+  /** Where the server keeps its own files (the generated secret). Defaults to <repo>/data. */
+  dataDir: string | undefined;
 }
 
 function invalid(message: string): Error {
@@ -88,20 +103,11 @@ function aiConfig(e: Env): AiConfig | null {
       'set AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY and AZURE_OPENAI_DEPLOYMENT together to turn on AI features, or leave all three empty',
     );
   }
-  let url: URL;
-  try {
-    url = new URL(e.AZURE_OPENAI_ENDPOINT!);
-  } catch {
-    throw invalid(
-      'AZURE_OPENAI_ENDPOINT must be a URL such as https://my-resource.openai.azure.com',
-    );
-  }
-  const local = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
-  if (url.protocol !== 'https:' && !local) throw invalid('AZURE_OPENAI_ENDPOINT must use https');
+  const endpoint = normalizeAzureEndpoint(e.AZURE_OPENAI_ENDPOINT!);
+  if (!endpoint.ok) throw invalid(`AZURE_OPENAI_ENDPOINT: ${endpoint.message}`);
   return {
     provider: 'azure-openai',
-    // Only the resource part counts, so a full "target URI" copied from the Azure portal works too.
-    endpoint: url.origin,
+    endpoint: endpoint.endpoint,
     apiKey: e.AZURE_OPENAI_API_KEY!,
     deployment: e.AZURE_OPENAI_DEPLOYMENT!,
     apiVersion: e.AZURE_OPENAI_API_VERSION,
@@ -140,5 +146,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     lockoutMinutes: e.LOCKOUT_MINUTES,
     passwordHashCost: e.PASSWORD_HASH_COST,
     ai: aiConfig(e),
+    aiTimeoutMs: e.AI_TIMEOUT_SECONDS * 1000,
+    secretKey: e.HELM_SECRET_KEY,
+    dataDir: e.HELM_DATA_DIR,
   };
 }

@@ -448,3 +448,24 @@ export const auditListQuerySchema = paginationQuerySchema.extend({
   action: z.string().trim().max(100).optional(),
   actorId: idSchema.optional(),
 });
+
+// ---------------------------------------------------------------- AI settings
+
+/** The Azure OpenAI connection an administrator enters. The key is write-only. */
+export const aiSettingsSchema = z.object({
+  endpoint: z.string().trim().min(1, 'Required').max(300),
+  deployment: z
+    .string()
+    .trim()
+    .min(1, 'Required')
+    .max(64)
+    .regex(/^[\w.-]+$/, 'Use the deployment name exactly as it appears in Azure'),
+  apiVersion: z
+    .string()
+    .trim()
+    .regex(/^\d{4}-\d{2}-\d{2}(-preview)?$/, 'Use a version such as 2024-10-21')
+    .default('2024-10-21'),
+  /** Leave out to keep the key that is already saved. */
+  apiKey: z.string().trim().min(8, 'This does not look like an API key').max(500).optional(),
+});
+export type AiSettingsInput = z.input<typeof aiSettingsSchema>;

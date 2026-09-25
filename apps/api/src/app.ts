@@ -3,7 +3,12 @@ import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import Fastify, { type FastifyInstance } from 'fastify';
 import type { Config } from './config/env';
-import { createLlmProvider, type LlmProvider } from './core/ai';
+import {
+  AiConnection,
+  createAzureOpenAiProvider,
+  type LlmProvider,
+  type ProviderFactory,
+} from './core/ai';
 import type { Database } from './db/client';
 import { registerModules } from './modules';
 import { registerAuth } from './plugins/auth';
@@ -15,19 +20,29 @@ declare module 'fastify' {
   interface FastifyInstance {
     db: Database;
     config: Config;
-    /** The language model provider, or null when AI features are off. */
-    ai: LlmProvider | null;
+    /** The AI connection: environment settings, or what an administrator saved. */
+    ai: AiConnection;
   }
 }
 
 export interface AppDependencies {
   db: Database;
   config: Config;
-  /** Defaults to the provider configured in config.ai; tests pass a fake one. */
+  /**
+   * A fixed provider (tests pass a fake, or null for no AI). By default: the environment
+   * settings if there are any, otherwise the settings saved on the AI assistant page.
+   */
   ai?: LlmProvider | null;
+  /** Builds providers from saved settings; tests pass a fake. */
+  createAiProvider?: ProviderFactory;
 }
 
-export async function buildApp({ db, config, ai }: AppDependencies): Promise<FastifyInstance> {
+export async function buildApp({
+  db,
+  config,
+  ai,
+  createAiProvider = (settings) => createAzureOpenAiProvider(settings),
+}: AppDependencies): Promise<FastifyInstance> {
   const app = Fastify({
     logger:
       config.logLevel === 'silent'
@@ -46,7 +61,17 @@ export async function buildApp({ db, config, ai }: AppDependencies): Promise<Fas
 
   app.decorate('db', db);
   app.decorate('config', config);
-  app.decorate('ai', ai === undefined ? createLlmProvider(config.ai) : ai);
+  app.decorate(
+    'ai',
+    new AiConnection({
+      db,
+      fixed: ai !== undefined ? ai : config.ai ? createAiProvider(config.ai) : undefined,
+      createProvider: createAiProvider,
+      secretKey: config.secretKey,
+      dataDir: config.dataDir,
+      timeoutMs: config.aiTimeoutMs,
+    }),
+  );
 
   registerErrorHandler(app);
   await app.register(helmet, {

@@ -75,25 +75,28 @@ Other settings are listed in [`.env.example`](.env.example).
 ## AI assistant (Azure OpenAI)
 
 Helm can suggest a meeting's action items from its transcript using your Azure OpenAI deployment
-(GPT-4o). It is off until you add three settings to `.env` (or the container's environment) and
-restart:
+(GPT-4o). To switch it on, sign in as an administrator, open **Administration → AI assistant**, and
+enter the endpoint, the deployment name and the API key (Azure portal → your resource → Keys and
+Endpoint). **Save and test** sends Azure a short test request and saves the settings only if it
+works. No restart is needed. After that, a meeting's **Action items** tab has a **Suggest from
+transcript** button.
 
-```bash
-AZURE_OPENAI_ENDPOINT=https://<your-resource>.openai.azure.com
-AZURE_OPENAI_API_KEY=<Azure portal → your resource → Keys and Endpoint>
-AZURE_OPENAI_DEPLOYMENT=<the name of your GPT-4o deployment>
-```
-
-Then open **Administration → AI assistant** and press **Test connection**. In a meeting, the
-**Action items** tab gets a **Suggest from transcript** button.
-
+- **The key stays protected.** It is stored encrypted (AES-256-GCM) and never shown again, only its
+  last four characters. The encryption key is a secret the server generates on first start in its
+  data folder (the `helm-data` volume in Docker), outside the database: back it up together with
+  the database, or set `HELM_SECRET_KEY` to manage it yourself. If it is lost, enter the API key
+  again.
 - **What is sent**, and only to your own Azure resource: the meeting's transcript, title, date and
   attendees, the usernames of the project's members, and the meeting's existing action items.
-- **Nothing is automatic:** each suggestion shows the transcript quote it came from and must be
+- **Nothing is automatic.** Each suggestion shows the transcript quote it came from and must be
   accepted by a person before it can become a ticket. Suggestions whose quote is not in the
   transcript are dropped.
-- **Everything is logged:** every AI request (who, model, tokens, time, outcome) is listed on the
-  AI assistant page. The key stays on the server.
+- **Everything is logged.** Every AI request (who, model, tokens, time, outcome) is listed on the AI
+  assistant page, and saving or removing the connection is in the audit log.
+
+For automated deployments you can set `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY` and
+`AZURE_OPENAI_DEPLOYMENT` as environment variables instead; the AI assistant page then shows them
+read-only.
 
 ## Contributing
 
