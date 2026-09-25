@@ -1,0 +1,26 @@
+.item {
+  display: block;
+  width: 100%;
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+  border-radius: var(--mantine-radius-md);
+}
+
+.item:hover {
+  background: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+}
+
+.item[data-unread] {
+  background: light-dark(
+    var(--mantine-color-helm-0),
+    color-mix(in srgb, var(--mantine-color-helm-9) 25%, transparent)
+  );
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--mantine-primary-color-filled);
+}

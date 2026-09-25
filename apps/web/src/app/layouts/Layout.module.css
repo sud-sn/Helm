@@ -1,0 +1,14 @@
+.header {
+  background: var(--mantine-color-navy-9);
+  border-bottom: 1px solid var(--mantine-color-navy-8);
+  color: var(--mantine-color-white);
+}
+
+.main {
+  background: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8));
+}
+
+.content {
+  max-width: 1400px;
+  margin: 0 auto;
+}

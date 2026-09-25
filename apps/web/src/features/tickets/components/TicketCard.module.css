@@ -1,0 +1,20 @@
+.card {
+  background: var(--mantine-color-body);
+  transition:
+    box-shadow 120ms ease,
+    transform 120ms ease;
+}
+
+.card[data-movable] {
+  cursor: grab;
+}
+
+.card[data-dragging] {
+  cursor: grabbing;
+  box-shadow: var(--mantine-shadow-lg);
+  transform: rotate(1.5deg);
+}
+
+.label {
+  max-width: 90px;
+}

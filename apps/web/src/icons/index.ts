@@ -1,0 +1,231 @@
+/**
+ * The icon registry — the only module that imports the icon library (ESLint enforces this).
+ * Features ask for a concept (`NavIcons.board`, `StatusIcons.done`), so each concept looks the
+ * same everywhere and can be changed in one place. See docs/design/design-system.md.
+ */
+import {
+  IconAlertTriangle,
+  IconArchive,
+  IconArrowBackUp,
+  IconArrowLeft,
+  IconAt,
+  IconBell,
+  IconBuildingSkyscraper,
+  IconBug,
+  IconCalendar,
+  IconChartBar,
+  IconCheck,
+  IconCheckupList,
+  IconChecklist,
+  IconChecks,
+  IconChevronDown,
+  IconChevronRight,
+  IconChevronUp,
+  IconChevronsUp,
+  IconCircleCheck,
+  IconCircleDashed,
+  IconCircleX,
+  IconClockHour4,
+  IconCopy,
+  IconDeviceDesktop,
+  IconDots,
+  IconEqual,
+  IconExternalLink,
+  IconEye,
+  IconEyeOff,
+  IconFileExport,
+  IconFileImport,
+  IconFileText,
+  IconFilter,
+  IconFlagCheck,
+  IconFolders,
+  IconGripVertical,
+  IconHandStop,
+  IconHistory,
+  IconHome,
+  IconInbox,
+  IconInfoCircle,
+  IconKey,
+  IconLayoutDashboard,
+  IconLayoutKanban,
+  IconLink,
+  IconListDetails,
+  IconLock,
+  IconLogout,
+  IconMessage,
+  IconMessages,
+  IconMicrophone,
+  IconMoon,
+  IconPencil,
+  IconPlayerPlay,
+  IconPlus,
+  IconPresentation,
+  IconProgress,
+  IconRefresh,
+  IconSchema,
+  IconSearch,
+  IconSend,
+  IconSettings,
+  IconShieldCheck,
+  IconShieldLock,
+  IconSquareCheck,
+  IconSun,
+  IconThumbDown,
+  IconThumbUp,
+  IconTransform,
+  IconTrash,
+  IconUserCheck,
+  IconUserPlus,
+  IconUsers,
+  IconWorldShare,
+  IconX,
+  type TablerIcon,
+} from '@tabler/icons-react';
+import type {
+  ActionItemStatus,
+  CycleStatus,
+  NotificationType,
+  PitchStatus,
+  TicketPriority,
+  TicketStatus,
+  TicketType,
+  Visibility,
+} from '@helm/shared';
+
+export type AppIcon = TablerIcon;
+
+/** Outline icons at 1.75 stroke on a 24px grid. */
+export const ICON_STROKE = 1.75;
+export const ICON_SIZE = { xs: 14, sm: 16, md: 18, lg: 20, xl: 24 } as const;
+
+export const NavIcons = {
+  dashboard: IconLayoutDashboard,
+  myWork: IconChecklist,
+  clients: IconBuildingSkyscraper,
+  projects: IconFolders,
+  board: IconLayoutKanban,
+  backlog: IconInbox,
+  cycles: IconRefresh,
+  tickets: IconListDetails,
+  pages: IconFileText,
+  meetings: IconMessages,
+  pitches: IconPresentation,
+  members: IconUsers,
+  notifications: IconBell,
+  admin: IconShieldLock,
+  users: IconUsers,
+  audit: IconHistory,
+  settings: IconSettings,
+  home: IconHome,
+} satisfies Record<string, AppIcon>;
+
+export const ActionIcons = {
+  add: IconPlus,
+  edit: IconPencil,
+  delete: IconTrash,
+  archive: IconArchive,
+  import: IconFileImport,
+  export: IconFileExport,
+  watch: IconEye,
+  unwatch: IconEyeOff,
+  comment: IconMessage,
+  logout: IconLogout,
+  send: IconSend,
+  search: IconSearch,
+  filter: IconFilter,
+  back: IconArrowLeft,
+  forward: IconChevronRight,
+  link: IconLink,
+  copy: IconCopy,
+  check: IconCheck,
+  close: IconX,
+  more: IconDots,
+  key: IconKey,
+  addUser: IconUserPlus,
+  lock: IconLock,
+  lightMode: IconSun,
+  darkMode: IconMoon,
+  systemMode: IconDeviceDesktop,
+  history: IconHistory,
+  transcript: IconMicrophone,
+  actionItem: IconCheckupList,
+  calendar: IconCalendar,
+  external: IconExternalLink,
+  markAllRead: IconChecks,
+  drag: IconGripVertical,
+  warning: IconAlertTriangle,
+  info: IconInfoCircle,
+  start: IconPlayerPlay,
+  complete: IconFlagCheck,
+  due: IconClockHour4,
+  accept: IconThumbUp,
+  reject: IconThumbDown,
+  requestChanges: IconArrowBackUp,
+} satisfies Record<string, AppIcon>;
+
+export const StatusIcons: Record<TicketStatus, AppIcon> = {
+  todo: IconCircleDashed,
+  in_progress: IconProgress,
+  blocked: IconHandStop,
+  in_review: IconEye,
+  uat: IconUserCheck,
+  done: IconCircleCheck,
+  cancelled: IconCircleX,
+};
+
+export const PriorityIcons: Record<TicketPriority, AppIcon> = {
+  urgent: IconChevronsUp,
+  high: IconChevronUp,
+  medium: IconEqual,
+  low: IconChevronDown,
+};
+
+export const TypeIcons: Record<TicketType, AppIcon> = {
+  task: IconSquareCheck,
+  bug: IconBug,
+  pipeline: IconTransform,
+  report: IconChartBar,
+  data_model: IconSchema,
+  data_quality: IconShieldCheck,
+  investigation: IconSearch,
+};
+
+export const PitchStatusIcons: Record<PitchStatus, AppIcon> = {
+  draft: IconPencil,
+  in_review: IconEye,
+  sent: IconSend,
+  changes_requested: IconArrowBackUp,
+  accepted: IconThumbUp,
+  rejected: IconThumbDown,
+  withdrawn: IconArchive,
+};
+
+export const CycleStatusIcons: Record<CycleStatus, AppIcon> = {
+  planned: IconCalendar,
+  active: IconProgress,
+  completed: IconCircleCheck,
+};
+
+export const VisibilityIcons: Record<Visibility, AppIcon> = {
+  internal: IconLock,
+  client: IconWorldShare,
+};
+
+export const ActionItemStatusIcons: Record<ActionItemStatus, AppIcon> = {
+  open: IconCircleDashed,
+  converted: IconCircleCheck,
+  dismissed: IconCircleX,
+};
+
+export const NotificationIcons: Record<NotificationType, AppIcon> = {
+  ticket_assigned: IconUserCheck,
+  mentioned: IconAt,
+  ticket_status_changed: IconProgress,
+  comment_added: IconMessage,
+  role_granted: IconKey,
+  pitch_submitted: IconEye,
+  pitch_sent: IconSend,
+  pitch_responded: IconMessages,
+  pitch_commented: IconMessage,
+  content_shared: IconWorldShare,
+};

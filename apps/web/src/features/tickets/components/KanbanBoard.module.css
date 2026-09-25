@@ -1,0 +1,28 @@
+.board {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(240px, 1fr));
+  gap: var(--mantine-spacing-sm);
+  align-items: start;
+  padding-bottom: var(--mantine-spacing-xs);
+}
+
+.column {
+  border-radius: var(--mantine-radius-md);
+  padding: var(--mantine-spacing-xs);
+  padding-top: var(--mantine-spacing-sm);
+  background: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-7));
+  border: 1px solid transparent;
+  min-height: 240px;
+}
+
+.column[data-over] {
+  border-color: var(--mantine-primary-color-filled);
+  background: light-dark(
+    var(--mantine-color-helm-0),
+    color-mix(in srgb, var(--mantine-color-helm-9) 30%, transparent)
+  );
+}
+
+.cards {
+  min-height: 120px;
+}

@@ -1,0 +1,49 @@
+.tag {
+  --tag-color: light-dark(var(--tag-light), var(--tag-dark));
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  /* Never stretch to fill a column (flex/grid stretch only applies to width: auto). */
+  width: fit-content;
+  max-width: 100%;
+  padding: 0 8px 0 6px;
+  border-radius: var(--mantine-radius-sm);
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--mantine-color-text);
+  background: color-mix(in srgb, var(--tag-color) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tag-color) 35%, transparent);
+  white-space: nowrap;
+}
+
+.tag svg {
+  flex: none;
+  color: var(--tag-color);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--tag-color);
+}
+
+.bare {
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.iconOnly {
+  --tag-color: light-dark(var(--tag-light), var(--tag-dark));
+  display: inline-flex;
+  color: var(--tag-color);
+  flex: none;
+}

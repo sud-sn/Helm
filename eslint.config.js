@@ -63,6 +63,10 @@ export default defineConfig([
     },
   },
   {
+    files: ['apps/web/public/**/*.js'],
+    languageOptions: { globals: globals.browser, sourceType: 'script' },
+  },
+  {
     files: ['apps/web/src/icons/**'],
     rules: { 'no-restricted-imports': 'off' },
   },
