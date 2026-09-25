@@ -1,0 +1,35 @@
+# Development: `docker compose up -d db` starts PostgreSQL for `npm run dev` and the tests.
+# Full stack:  `docker compose --profile app up --build` runs the production image on :3000.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: helm
+      POSTGRES_PASSWORD: helm
+      POSTGRES_DB: helm
+    ports:
+      - '5432:5432'
+    volumes:
+      - helm-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U helm -d helm']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    profiles: ['app']
+    build: .
+    environment:
+      DATABASE_URL: postgres://helm:helm@db:5432/helm
+      HELM_ADMIN_USERNAME: ${HELM_ADMIN_USERNAME:-admin}
+      HELM_ADMIN_PASSWORD: ${HELM_ADMIN_PASSWORD:-}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    ports:
+      - '3000:3000'
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  helm-db:

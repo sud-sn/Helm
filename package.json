@@ -1,0 +1,40 @@
+{
+  "name": "helm",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Helm: project management and documentation portal for BI/ETL delivery teams",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev -w @helm/api\" \"npm run dev -w @helm/web\"",
+    "build": "npm run build -w @helm/web && npm run build -w @helm/api",
+    "start": "npm run start -w @helm/api",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run test --workspaces --if-present",
+    "db:generate": "npm run db:generate -w @helm/api",
+    "db:migrate": "npm run db:migrate -w @helm/api",
+    "docs:rbac": "npm run docs:rbac -w @helm/shared"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.0",
+    "@types/node": "^22.19.0",
+    "concurrently": "^10.0.5",
+    "eslint": "^10.11.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.9",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^5.0.1"
+  }
+}
