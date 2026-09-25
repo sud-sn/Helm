@@ -27,6 +27,7 @@ const ACTIONS = [
   'page.visibility_changed',
   'meeting.deleted',
   'meeting.visibility_changed',
+  'meeting.action_items_suggested',
   'pitch.sent',
   'pitch.responded',
   'pitch.withdrawn',

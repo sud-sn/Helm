@@ -33,7 +33,27 @@ const envSchema = z.object({
   LOCKOUT_MINUTES: z.coerce.number().int().min(1).default(15),
   /** log2 of the scrypt cost parameter N. 15 in production; tests lower it for speed. */
   PASSWORD_HASH_COST: z.coerce.number().int().min(10).max(20).default(15),
+  // AI features (Azure OpenAI). All three of endpoint, key and deployment, or none.
+  AZURE_OPENAI_ENDPOINT: optionalText,
+  AZURE_OPENAI_API_KEY: optionalText,
+  AZURE_OPENAI_DEPLOYMENT: optionalText,
+  AZURE_OPENAI_API_VERSION: z.string().trim().min(1).default('2024-10-21'),
+  AI_TIMEOUT_SECONDS: z.coerce.number().int().min(5).max(300).default(60),
 });
+
+type Env = z.output<typeof envSchema>;
+
+/** Azure OpenAI access. The key never leaves the server and is never logged. */
+export interface AiConfig {
+  provider: 'azure-openai';
+  /** The resource endpoint, e.g. https://my-resource.openai.azure.com */
+  endpoint: string;
+  apiKey: string;
+  /** The deployment name chosen in Azure (it names the model, e.g. a GPT-4o deployment). */
+  deployment: string;
+  apiVersion: string;
+  timeoutMs: number;
+}
 
 export interface Config {
   env: 'development' | 'production' | 'test';
@@ -52,6 +72,41 @@ export interface Config {
   lockoutThreshold: number;
   lockoutMinutes: number;
   passwordHashCost: number;
+  /** null when Azure OpenAI is not configured: AI features are then switched off. */
+  ai: AiConfig | null;
+}
+
+function invalid(message: string): Error {
+  return new Error(`Invalid environment configuration: ${message}`);
+}
+
+function aiConfig(e: Env): AiConfig | null {
+  const settings = [e.AZURE_OPENAI_ENDPOINT, e.AZURE_OPENAI_API_KEY, e.AZURE_OPENAI_DEPLOYMENT];
+  if (settings.every((value) => value === undefined)) return null;
+  if (settings.some((value) => value === undefined)) {
+    throw invalid(
+      'set AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY and AZURE_OPENAI_DEPLOYMENT together to turn on AI features, or leave all three empty',
+    );
+  }
+  let url: URL;
+  try {
+    url = new URL(e.AZURE_OPENAI_ENDPOINT!);
+  } catch {
+    throw invalid(
+      'AZURE_OPENAI_ENDPOINT must be a URL such as https://my-resource.openai.azure.com',
+    );
+  }
+  const local = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
+  if (url.protocol !== 'https:' && !local) throw invalid('AZURE_OPENAI_ENDPOINT must use https');
+  return {
+    provider: 'azure-openai',
+    // Only the resource part counts, so a full "target URI" copied from the Azure portal works too.
+    endpoint: url.origin,
+    apiKey: e.AZURE_OPENAI_API_KEY!,
+    deployment: e.AZURE_OPENAI_DEPLOYMENT!,
+    apiVersion: e.AZURE_OPENAI_API_VERSION,
+    timeoutMs: e.AI_TIMEOUT_SECONDS * 1000,
+  };
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
@@ -60,7 +115,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     const problems = parsed.error.issues
       .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
       .join('; ');
-    throw new Error(`Invalid environment configuration: ${problems}`);
+    throw invalid(problems);
   }
   const e = parsed.data;
   return {
@@ -84,5 +139,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     lockoutThreshold: e.LOCKOUT_THRESHOLD,
     lockoutMinutes: e.LOCKOUT_MINUTES,
     passwordHashCost: e.PASSWORD_HASH_COST,
+    ai: aiConfig(e),
   };
 }

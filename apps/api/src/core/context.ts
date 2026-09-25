@@ -1,5 +1,6 @@
 import type { Config } from '../config/env';
 import type { Database } from '../db/client';
+import type { LlmProvider } from './ai';
 import type { Access } from './access/access';
 import type { AuthUser } from './auth-user';
 
@@ -10,4 +11,6 @@ export interface RequestContext {
   user: AuthUser;
   access: Access;
   ip: string | null;
+  /** The language model provider, or null when AI features are off. */
+  ai: LlmProvider | null;
 }

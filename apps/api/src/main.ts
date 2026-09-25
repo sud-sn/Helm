@@ -26,6 +26,9 @@ const webDistDir =
   config.webDistDir ?? (existsSync(`${builtWeb}/index.html`) ? builtWeb : undefined);
 const app = await buildApp({ db: database.db, config: { ...config, webDistDir } });
 
+if (app.ai) {
+  app.log.info(app.ai.description, 'AI features are on (Azure OpenAI)');
+}
 if (config.migrateOnStart) await runMigrations(database);
 await ensureFirstAdmin(database.db, config, app.log);
 

@@ -1,4 +1,5 @@
 import type { FastifyInstance } from 'fastify';
+import { aiRoutes } from './ai/ai.routes';
 import { auditRoutes } from './audit/audit.routes';
 import { authRoutes } from './auth/auth.routes';
 import { clientRoutes } from './clients/clients.routes';
@@ -28,4 +29,5 @@ export async function registerModules(api: FastifyInstance): Promise<void> {
   await api.register(meetingRoutes);
   await api.register(dashboardRoutes);
   await api.register(auditRoutes);
+  await api.register(aiRoutes);
 }

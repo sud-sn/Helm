@@ -4,6 +4,7 @@ import pg from 'pg';
 import type { Role, ScopeType, UserType } from '@helm/shared';
 import { buildApp } from '../src/app';
 import { loadConfig, type Config } from '../src/config/env';
+import type { LlmProvider } from '../src/core/ai';
 import { createDatabase, type Database } from '../src/db/client';
 import { clients, cycles, projects, roleAssignments, users } from '../src/db/schema';
 import { hashPassword } from '../src/core/security/password';
@@ -43,8 +44,14 @@ export interface TestApp {
   close: () => Promise<void>;
 }
 
-/** A fresh app on a private copy of the migrated template database. */
-export async function createTestApp(env: Record<string, string> = {}): Promise<TestApp> {
+/**
+ * A fresh app on a private copy of the migrated template database. AI is off unless a provider
+ * (usually a fake) is passed.
+ */
+export async function createTestApp(
+  env: Record<string, string> = {},
+  { ai = null }: { ai?: LlmProvider | null } = {},
+): Promise<TestApp> {
   const database = `${TEST_DATABASE_PREFIX}${randomUUID().replace(/-/g, '').slice(0, 16)}`;
   await maintenanceQuery(`create database "${database}" template "${TEMPLATE_DATABASE}"`);
   const url = withDatabase(TEST_DATABASE_URL, database);
@@ -57,7 +64,7 @@ export async function createTestApp(env: Record<string, string> = {}): Promise<T
     LOGIN_RATE_LIMIT_PER_MINUTE: '10000',
     ...env,
   });
-  const app = await buildApp({ db: handle.db, config });
+  const app = await buildApp({ db: handle.db, config, ai });
   await app.ready();
   return {
     app,

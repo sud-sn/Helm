@@ -19,6 +19,7 @@ export const paths = {
   adminUsers: '/admin/users',
   adminUser: (id: string) => `/admin/users/${id}`,
   adminAudit: '/admin/audit',
+  adminAi: '/admin/ai',
   portal: {
     home: '/portal',
     notifications: '/portal/notifications',

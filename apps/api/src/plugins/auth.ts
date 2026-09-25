@@ -77,6 +77,7 @@ export function registerAuth(app: FastifyInstance): void {
       user,
       access: await loadAccess(app.db, user),
       ip: request.ip ?? null,
+      ai: app.ai,
     };
   });
 }

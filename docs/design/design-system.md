@@ -118,6 +118,10 @@ Every state is shown as **icon + label** (the `Tag` component). Colour is never 
 | Rejected          | danger  | `IconThumbDown`   |
 | Withdrawn         | neutral | `IconArchive`     |
 
+**Action items** — `Suggested` (from AI, waiting for review): review, `IconSparkles`. `Open`:
+neutral, `IconCircleDashed`. `Converted`: success, `IconCircleCheck`. `Dismissed`: neutral,
+`IconCircleX`. Anything AI proposed keeps the sparkles icon and shows the quote it came from.
+
 **Visibility** — `Internal`: neutral, `IconLock`. `Shared with client`: client (brass),
 `IconWorldShare`. Anything a client can see carries the brass tag, so staff always know what
 leaves the building.
@@ -180,6 +184,7 @@ requests to third parties. Tables and numeric columns use `tabular-nums`.
 | Notifications | `IconBell`               | Administration  | `IconShieldLock`                    |
 | Audit log     | `IconHistory`            | Import / Export | `IconFileImport` / `IconFileExport` |
 | Transcript    | `IconMicrophone`         | Action item     | `IconCheckupList`                   |
+| AI suggestion | `IconSparkles`           |                 |                                     |
 
 ## Accessibility checklist
 

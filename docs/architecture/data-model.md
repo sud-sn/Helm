@@ -15,7 +15,8 @@ clients ──< projects ──< cycles
                │           ├─< ticket_events      (history: status, assignee, cycle, fields)
                │           └─< ticket_watchers
                ├──< pages ──< page_versions        (optional link to a ticket)
-clients ──< meetings ──< meeting_action_items ──> tickets | pitches
+clients ──< meetings ──< meeting_action_items ──> tickets | pitches | ai_runs
+ai_runs >── meetings, users                         (one row per AI call)
 clients ──< pitches ──< pitch_comments             (optional link to a project)
 
 audit_log (append-only)
@@ -33,5 +34,9 @@ audit_log (append-only)
   Transcripts are never shared.
 - **History** (`ticket_events`) records every status transition with a timestamp from day one, so
   cycle time and throughput can be computed later without back-filling.
+- **AI runs** (`ai_runs`) record every call to the language model: task, model, prompt version,
+  tokens, duration, outcome and requester. Action items carry `source` (`manual` | `ai`),
+  `source_quote` and `ai_run_id`; AI items start as `suggested` and a person moves them to `open`
+  or `dismissed`. Only `open` items can become tickets.
 - **Pages** store the current version inline and every version in `page_versions`; saves use
   optimistic concurrency (`expectedVersion`).

@@ -134,6 +134,7 @@ export const VISIBILITY_TONE: Record<Visibility, Tone> = {
 };
 
 export const ACTION_ITEM_TONE: Record<ActionItemStatus, Tone> = {
+  suggested: 'review',
   open: 'neutral',
   converted: 'success',
   dismissed: 'neutral',

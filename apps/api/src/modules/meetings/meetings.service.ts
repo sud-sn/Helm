@@ -61,9 +61,9 @@ function selectMeetings(db: Executor) {
     .innerJoin(creator, eq(creator.id, meetings.createdById));
 }
 
-type MeetingRow = Awaited<ReturnType<ReturnType<typeof selectMeetings>['execute']>>[number];
+export type MeetingRow = Awaited<ReturnType<ReturnType<typeof selectMeetings>['execute']>>[number];
 
-const meetingScope = (row: {
+export const meetingScope = (row: {
   meeting: { clientId: string; projectId: string | null };
 }): ResourceScope => ({
   clientId: row.meeting.clientId,
@@ -270,7 +270,7 @@ export async function deleteMeeting(ctx: RequestContext, meetingId: string): Pro
 
 const suggested = alias(users, 'suggested_assignee');
 
-function selectActionItems(db: Executor) {
+export function selectActionItems(db: Executor) {
   return db
     .select({
       item: meetingActionItems,
@@ -292,7 +292,7 @@ function selectActionItems(db: Executor) {
 
 type ActionItemRow = Awaited<ReturnType<ReturnType<typeof selectActionItems>['execute']>>[number];
 
-function toActionItem(row: ActionItemRow): ActionItem {
+export function toActionItem(row: ActionItemRow): ActionItem {
   const i = row.item;
   return {
     id: i.id,
@@ -302,6 +302,8 @@ function toActionItem(row: ActionItemRow): ActionItem {
     suggestedAssignee: userSummary(row.suggestedAssignee),
     dueDate: i.dueDate,
     status: i.status,
+    source: i.source,
+    sourceQuote: i.sourceQuote,
     ticket:
       i.ticketId && row.ticketNumber != null && row.ticketProjectKey
         ? { id: i.ticketId, key: formatTicketKey(row.ticketProjectKey, row.ticketNumber) }
@@ -312,7 +314,10 @@ function toActionItem(row: ActionItemRow): ActionItem {
 }
 
 /** Action items are internal: they need staff read access to the meeting. */
-async function requireStaffMeeting(ctx: RequestContext, meetingId: string): Promise<MeetingRow> {
+export async function requireStaffMeeting(
+  ctx: RequestContext,
+  meetingId: string,
+): Promise<MeetingRow> {
   const row = await requireMeeting(ctx, meetingId);
   if (!isStaffReader(ctx.access, row)) throw notFound('Meeting');
   return row;
@@ -445,7 +450,10 @@ export async function convertActionItems(
   if (items.length !== itemIds.length)
     throw badRequest('Some action items do not belong to this meeting.');
   if (items.some((item) => item.status !== 'open')) {
-    throw conflict('Only open action items can be converted.', 'ALREADY_CONVERTED');
+    throw conflict(
+      'Only open action items can be converted. Accept suggested items first.',
+      'ACTION_ITEM_NOT_OPEN',
+    );
   }
   for (const choice of input.items) {
     if (choice.assigneeId) await assertAssignable(ctx.db, choice.assigneeId, scope);
@@ -499,7 +507,10 @@ export async function actionItemToPitch(
     .from(meetingActionItems)
     .where(eq(meetingActionItems.id, itemId));
   if (item!.status !== 'open')
-    throw conflict('Only open action items can be converted.', 'ALREADY_CONVERTED');
+    throw conflict(
+      'Only open action items can be converted. Accept suggested items first.',
+      'ACTION_ITEM_NOT_OPEN',
+    );
   const pitchId = await ctx.db.transaction(async (tx) => {
     const id = await insertPitch(tx, {
       clientId: meeting.meeting.clientId,

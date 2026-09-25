@@ -2,7 +2,10 @@
  * Shapes of API responses. Timestamps are ISO strings; calendar dates are YYYY-MM-DD.
  */
 import type {
+  ActionItemSource,
   ActionItemStatus,
+  AiRunStatus,
+  AiTask,
   CycleStatus,
   NotificationType,
   PitchStatus,
@@ -301,9 +304,63 @@ export interface ActionItem {
   suggestedAssignee: UserSummary | null;
   dueDate: string | null;
   status: ActionItemStatus;
+  source: ActionItemSource;
+  /** For AI suggestions: the words in the transcript the item came from. Empty otherwise. */
+  sourceQuote: string;
   ticket: { id: string; key: string } | null;
   pitch: { id: string; title: string } | null;
   createdAt: string;
+}
+
+export interface SuggestActionItemsResult {
+  /** The model that produced the suggestions, e.g. gpt-4o-2024-11-20. */
+  model: string;
+  created: ActionItem[];
+  skipped: {
+    /** Proposed items whose quote could not be found in the transcript. */
+    unverified: number;
+    /** Proposed items that repeat an existing action item. */
+    duplicates: number;
+  };
+}
+
+// ---------------------------------------------------------------- AI
+
+/** What the web app may offer; AI is off until an administrator configures Azure OpenAI. */
+export interface Features {
+  ai: boolean;
+}
+
+export interface AiRun {
+  id: string;
+  task: AiTask;
+  model: string;
+  promptVersion: string;
+  status: AiRunStatus;
+  errorKind: string | null;
+  requestedBy: UserSummary | null;
+  meeting: { id: string; title: string } | null;
+  inputTokens: number;
+  outputTokens: number;
+  durationMs: number;
+  createdAt: string;
+}
+
+/** The administrator's view of the AI connection. The API key is never sent. */
+export interface AiStatus {
+  enabled: boolean;
+  provider: 'azure-openai' | null;
+  endpointHost: string | null;
+  deployment: string | null;
+  apiVersion: string | null;
+  recentRuns: AiRun[];
+}
+
+export interface AiTestResult {
+  model: string;
+  durationMs: number;
+  /** json_schema: the deployment supports structured outputs; json_object: JSON mode only. */
+  responseFormat: 'json_schema' | 'json_object';
 }
 
 // ---------------------------------------------------------------- audit, import

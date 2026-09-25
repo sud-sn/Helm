@@ -143,6 +143,10 @@ export const router = createBrowserRouter([
             path: 'admin/audit',
             lazy: screen(() => import('./routes/admin/AuditRoute'), 'AuditRoute'),
           },
+          {
+            path: 'admin/ai',
+            lazy: screen(() => import('./routes/admin/AiRoute'), 'AiRoute'),
+          },
           { path: '*', Component: NotFoundRoute },
         ],
       },

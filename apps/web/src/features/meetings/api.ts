@@ -6,6 +6,7 @@ import type {
   CreateMeetingInput,
   Meeting,
   MeetingSummary,
+  SuggestActionItemsResult,
   Ticket,
   UpdateActionItemInput,
   UpdateMeetingInput,
@@ -90,6 +91,21 @@ export function useCreateActionItem(meetingId: string) {
   return useMutation({
     mutationFn: (input: CreateActionItemInput) =>
       api<ActionItem>(`/meetings/${meetingId}/action-items`, { method: 'POST', body: input }),
+    onSuccess: invalidate,
+  });
+}
+
+/** Asks AI for action items from the transcript; they arrive as `suggested` items to review. */
+export function useSuggestActionItems(meetingId: string) {
+  const invalidate = useInvalidateMeetings();
+  return useMutation({
+    mutationFn: () =>
+      api<SuggestActionItemsResult>(`/meetings/${meetingId}/action-items/suggest`, {
+        method: 'POST',
+        body: {},
+      }),
+    // The panel shows failures next to the button.
+    meta: { silent: true },
     onSuccess: invalidate,
   });
 }

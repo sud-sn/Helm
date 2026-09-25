@@ -35,8 +35,8 @@ documentation and, later, AI assistance.
 
 AI sits behind a provider interface ([ADR 0006](../adr/0006-llm-provider-abstraction.md)).
 
-- MOM extraction: fill a meeting's action items from its transcript, each with a source quote; the
-  Team Lead reviews them in the existing action-item list.
+- **Built (Azure OpenAI, GPT-4o):** MOM extraction — "Suggest from transcript" fills a meeting's
+  action items, each with its source quote; people accept or dismiss them in the action-item list.
 - Auto-documentation: draft a Page from a developer's notes plus the ticket's context; the author
   edits and publishes.
 - Knowledge search over pages, tickets and minutes, filtered by what the user can see.

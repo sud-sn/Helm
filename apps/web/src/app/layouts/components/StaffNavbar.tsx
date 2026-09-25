@@ -114,6 +114,12 @@ export function StaffNavbar({ onNavigate }: { onNavigate: () => void }) {
               icon={NavIcons.audit}
               onNavigate={onNavigate}
             />
+            <NavItem
+              to={paths.adminAi}
+              label="AI assistant"
+              icon={NavIcons.ai}
+              onNavigate={onNavigate}
+            />
           </>
         ) : null}
       </Stack>

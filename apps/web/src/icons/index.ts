@@ -65,6 +65,7 @@ import {
   IconSchema,
   IconSearch,
   IconSend,
+  IconSparkles,
   IconSettings,
   IconShieldCheck,
   IconShieldLock,
@@ -115,6 +116,7 @@ export const NavIcons = {
   admin: IconShieldLock,
   users: IconUsers,
   audit: IconHistory,
+  ai: IconSparkles,
   settings: IconSettings,
   home: IconHome,
 } satisfies Record<string, AppIcon>;
@@ -161,6 +163,8 @@ export const ActionIcons = {
   accept: IconThumbUp,
   reject: IconThumbDown,
   requestChanges: IconArrowBackUp,
+  /** Anything AI proposes; always shown with its label or a tooltip. */
+  suggest: IconSparkles,
 } satisfies Record<string, AppIcon>;
 
 export const StatusIcons: Record<TicketStatus, AppIcon> = {
@@ -212,6 +216,7 @@ export const VisibilityIcons: Record<Visibility, AppIcon> = {
 };
 
 export const ActionItemStatusIcons: Record<ActionItemStatus, AppIcon> = {
+  suggested: IconSparkles,
   open: IconCircleDashed,
   converted: IconCircleCheck,
   dismissed: IconCircleX,

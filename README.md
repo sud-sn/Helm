@@ -72,6 +72,29 @@ HTTPS and set `COOKIE_SECURE=true` (and `TRUST_PROXY=true` behind a reverse prox
 fonts included, is served from the container: the portal makes no requests to third parties.
 Other settings are listed in [`.env.example`](.env.example).
 
+## AI assistant (Azure OpenAI)
+
+Helm can suggest a meeting's action items from its transcript using your Azure OpenAI deployment
+(GPT-4o). It is off until you add three settings to `.env` (or the container's environment) and
+restart:
+
+```bash
+AZURE_OPENAI_ENDPOINT=https://<your-resource>.openai.azure.com
+AZURE_OPENAI_API_KEY=<Azure portal → your resource → Keys and Endpoint>
+AZURE_OPENAI_DEPLOYMENT=<the name of your GPT-4o deployment>
+```
+
+Then open **Administration → AI assistant** and press **Test connection**. In a meeting, the
+**Action items** tab gets a **Suggest from transcript** button.
+
+- **What is sent**, and only to your own Azure resource: the meeting's transcript, title, date and
+  attendees, the usernames of the project's members, and the meeting's existing action items.
+- **Nothing is automatic:** each suggestion shows the transcript quote it came from and must be
+  accepted by a person before it can become a ticket. Suggestions whose quote is not in the
+  transcript are dropped.
+- **Everything is logged:** every AI request (who, model, tokens, time, outcome) is listed on the
+  AI assistant page. The key stays on the server.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).

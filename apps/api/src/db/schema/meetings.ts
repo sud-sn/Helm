@@ -1,6 +1,7 @@
 import { check, date, index, pgTable, text, uuid, type AnyPgColumn } from 'drizzle-orm/pg-core';
-import { ACTION_ITEM_STATUSES, VISIBILITIES } from '@helm/shared';
+import { ACTION_ITEM_SOURCES, ACTION_ITEM_STATUSES, VISIBILITIES } from '@helm/shared';
 import { createdAt, id, oneOf, updatedAt } from './_helpers';
+import { aiRuns } from './ai';
 import { clients, projects } from './org';
 import { pitches } from './pitches';
 import { tickets } from './tickets';
@@ -36,8 +37,6 @@ export const meetings = pgTable(
   ],
 );
 
-export const ACTION_ITEM_SOURCES = ['manual', 'ai'] as const;
-
 /** Things agreed in a meeting; a Team Lead turns them into tickets or pitches. */
 export const meetingActionItems = pgTable(
   'meeting_action_items',
@@ -57,9 +56,10 @@ export const meetingActionItems = pgTable(
       onDelete: 'set null',
     }),
     pitchId: uuid('pitch_id').references((): AnyPgColumn => pitches.id, { onDelete: 'set null' }),
-    /** 'ai' once extraction exists; the quote shows where in the transcript it came from. */
+    /** 'ai' for suggestions from the transcript; the quote shows where each one came from. */
     source: text('source', { enum: ACTION_ITEM_SOURCES }).notNull().default('manual'),
     sourceQuote: text('source_quote').notNull().default(''),
+    aiRunId: uuid('ai_run_id').references((): AnyPgColumn => aiRuns.id, { onDelete: 'set null' }),
     createdById: uuid('created_by_id').references(() => users.id, { onDelete: 'set null' }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),

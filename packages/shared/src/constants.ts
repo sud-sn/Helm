@@ -147,14 +147,32 @@ export const VISIBILITY_LABELS: Record<Visibility, string> = {
   client: 'Shared with client',
 };
 
-export const ACTION_ITEM_STATUSES = ['open', 'converted', 'dismissed'] as const;
+/** `suggested` items come from AI and wait for a person to accept (→ open) or dismiss them. */
+export const ACTION_ITEM_STATUSES = ['suggested', 'open', 'converted', 'dismissed'] as const;
 export type ActionItemStatus = (typeof ACTION_ITEM_STATUSES)[number];
 
 export const ACTION_ITEM_STATUS_LABELS: Record<ActionItemStatus, string> = {
+  suggested: 'Suggested',
   open: 'Open',
   converted: 'Converted',
   dismissed: 'Dismissed',
 };
+
+/** Whether a person typed the action item or AI proposed it from the transcript. */
+export const ACTION_ITEM_SOURCES = ['manual', 'ai'] as const;
+export type ActionItemSource = (typeof ACTION_ITEM_SOURCES)[number];
+
+/** What an AI call was for; every call is recorded (see the AI assistant admin page). */
+export const AI_TASKS = ['meeting_action_items', 'connection_test'] as const;
+export type AiTask = (typeof AI_TASKS)[number];
+
+export const AI_TASK_LABELS: Record<AiTask, string> = {
+  meeting_action_items: 'Action items from a transcript',
+  connection_test: 'Connection test',
+};
+
+export const AI_RUN_STATUSES = ['succeeded', 'failed'] as const;
+export type AiRunStatus = (typeof AI_RUN_STATUSES)[number];
 
 export const NOTIFICATION_TYPES = [
   'ticket_assigned',

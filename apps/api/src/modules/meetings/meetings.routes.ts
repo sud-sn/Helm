@@ -26,6 +26,7 @@ import {
   updateActionItem,
   updateMeeting,
 } from './meetings.service';
+import { suggestActionItems } from './suggestions.service';
 
 const idParams = z.object({ id: idSchema });
 
@@ -76,6 +77,21 @@ export async function meetingRoutes(app: FastifyInstance): Promise<void> {
     );
     return reply.status(201).send(created);
   });
+
+  app.post(
+    '/meetings/:id/action-items/suggest',
+    {
+      config: {
+        // Each call costs money and takes seconds: a generous limit that stops runaway clicking.
+        rateLimit: {
+          max: 10,
+          timeWindow: '1 minute',
+          keyGenerator: (request) => request.user?.id ?? request.ip,
+        },
+      },
+    },
+    async (request) => suggestActionItems(ctx(request), parse(idParams, request.params).id),
+  );
 
   app.post('/meetings/:id/action-items/convert', async (request, reply) => {
     const created = await convertActionItems(
