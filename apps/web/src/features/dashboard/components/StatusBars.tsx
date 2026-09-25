@@ -1,6 +1,7 @@
 import { Box, Group, Stack, Text, Tooltip } from '@mantine/core';
 import { TICKET_STATUS_LABELS, type StatusCount } from '@helm/shared';
 import { StatusTag } from '@/components/domain-tags';
+import { SCHEME_VALUE, schemeClass, schemeVars } from '@/theme/scheme';
 import { CHART_SERIES } from '@/theme/tokens';
 
 /**
@@ -20,12 +21,14 @@ export function StatusBars({ counts }: { counts: StatusCount[] }) {
           <Tooltip label={`${TICKET_STATUS_LABELS[status]}: ${count} of ${total} tickets`}>
             <Box style={{ flex: 1, height: 14, display: 'flex', alignItems: 'center' }}>
               <Box
+                className={schemeClass}
                 style={{
+                  ...schemeVars(CHART_SERIES.light, CHART_SERIES.dark),
                   width: `${(count / max) * 100}%`,
                   minWidth: count > 0 ? 4 : 0,
                   height: 10,
                   borderRadius: '0 4px 4px 0',
-                  background: `light-dark(${CHART_SERIES.light}, ${CHART_SERIES.dark})`,
+                  background: SCHEME_VALUE,
                 }}
               />
             </Box>

@@ -6,14 +6,19 @@
 }
 
 .item:hover {
-  background: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+  background: var(--mantine-color-gray-0);
+}
+
+:global([data-mantine-color-scheme='dark']) .item:hover {
+  background: var(--mantine-color-dark-6);
 }
 
 .item[data-unread] {
-  background: light-dark(
-    var(--mantine-color-helm-0),
-    color-mix(in srgb, var(--mantine-color-helm-9) 25%, transparent)
-  );
+  background: var(--mantine-color-helm-0);
+}
+
+:global([data-mantine-color-scheme='dark']) .item[data-unread] {
+  background: color-mix(in srgb, var(--mantine-color-helm-9) 25%, transparent);
 }
 
 .dot {

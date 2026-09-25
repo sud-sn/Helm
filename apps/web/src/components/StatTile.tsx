@@ -1,6 +1,7 @@
 import { Card, Group, Stack, Text } from '@mantine/core';
 import type { ReactNode } from 'react';
 import { ICON_SIZE, ICON_STROKE, type AppIcon } from '@/icons';
+import { SCHEME_VALUE, schemeClass, schemeVars } from '@/theme/scheme';
 import { TONES, type Tone } from '@/theme/tokens';
 
 /** A headline number: sentence-case label, semibold value, optional status icon. */
@@ -25,8 +26,10 @@ export function StatTile({
             <Icon
               size={ICON_SIZE.sm}
               stroke={ICON_STROKE}
+              className={schemeClass}
               style={{
-                color: `light-dark(${TONES[tone].light}, ${TONES[tone].dark})`,
+                ...schemeVars(TONES[tone].light, TONES[tone].dark),
+                color: SCHEME_VALUE,
                 flex: 'none',
               }}
               aria-hidden

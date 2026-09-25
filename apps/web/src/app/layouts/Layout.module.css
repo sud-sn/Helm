@@ -5,7 +5,11 @@
 }
 
 .main {
-  background: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8));
+  background: var(--mantine-color-gray-0);
+}
+
+:global([data-mantine-color-scheme='dark']) .main {
+  background: var(--mantine-color-dark-8);
 }
 
 .content {

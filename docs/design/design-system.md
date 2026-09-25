@@ -62,6 +62,13 @@ light-mode and dark-mode step, chosen so icons and borders clear 3 : 1 against t
 
 Yellow is not used for meaning: no yellow step reaches 3 : 1 on white.
 
+**Applying a light/dark pair.** In CSS modules, set the light value and override it under
+`:global([data-mantine-color-scheme='dark'])`; for inline styles use `schemeClass` and
+`schemeVars()` from `apps/web/src/theme/scheme.ts`. Do not use the CSS `light-dark()` function:
+the production minifier rewrites it into a fallback that only works when the same stylesheet
+declares `color-scheme`, which removed every tone colour from production builds. A test in
+`apps/web/test/` fails if it appears in the source.
+
 ### Domain mappings
 
 Every state is shown as **icon + label** (the `Tag` component). Colour is never the only signal.

@@ -1,0 +1,15 @@
+/*
+ * A value that differs between the light and dark colour schemes, for inline styles: the element
+ * gets this class plus --scheme-light / --scheme-dark (see scheme.ts) and uses
+ * var(--scheme-value). Mantine marks the active scheme on <html>, so a plain attribute selector
+ * picks the value. The CSS light-dark function is avoided on purpose: the production minifier
+ * rewrites it for older browsers into a form that only works when the same stylesheet declares
+ * color-scheme, which silently removed these colours in production builds.
+ */
+.scheme {
+  --scheme-value: var(--scheme-light);
+}
+
+:global([data-mantine-color-scheme='dark']) .scheme {
+  --scheme-value: var(--scheme-dark);
+}

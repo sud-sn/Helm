@@ -1,6 +1,7 @@
 import { Group, Progress, Stack, Text, Tooltip } from '@mantine/core';
 import type { ReactNode } from 'react';
 import { percent } from '@/lib/format';
+import { SCHEME_VALUE, schemeClass, schemeVars } from '@/theme/scheme';
 
 /**
  * Progress against a total: helm fill on a lighter step of the same ramp, with the numbers
@@ -33,11 +34,9 @@ export function Meter({
           radius="xl"
           color="helm"
           aria-label={`${value}% done`}
-          styles={{
-            root: {
-              background: 'light-dark(var(--mantine-color-helm-1), var(--mantine-color-helm-9))',
-            },
-          }}
+          className={schemeClass}
+          style={schemeVars('var(--mantine-color-helm-1)', 'var(--mantine-color-helm-9)')}
+          styles={{ root: { background: SCHEME_VALUE } }}
         />
       </Tooltip>
       {extra}

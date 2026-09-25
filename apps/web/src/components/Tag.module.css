@@ -1,5 +1,16 @@
+/* The tone arrives as --tag-light / --tag-dark (inline) and the colour scheme picks one; see
+   theme/scheme.module.css for why this is an attribute selector. */
+.tag,
+.iconOnly {
+  --tag-color: var(--tag-light);
+}
+
+:global([data-mantine-color-scheme='dark']) .tag,
+:global([data-mantine-color-scheme='dark']) .iconOnly {
+  --tag-color: var(--tag-dark);
+}
+
 .tag {
-  --tag-color: light-dark(var(--tag-light), var(--tag-dark));
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -42,7 +53,6 @@
 }
 
 .iconOnly {
-  --tag-color: light-dark(var(--tag-light), var(--tag-dark));
   display: inline-flex;
   color: var(--tag-color);
   flex: none;

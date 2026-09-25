@@ -10,17 +10,22 @@
   border-radius: var(--mantine-radius-md);
   padding: var(--mantine-spacing-xs);
   padding-top: var(--mantine-spacing-sm);
-  background: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-7));
+  background: var(--mantine-color-gray-1);
   border: 1px solid transparent;
   min-height: 240px;
 }
 
+:global([data-mantine-color-scheme='dark']) .column {
+  background: var(--mantine-color-dark-7);
+}
+
 .column[data-over] {
   border-color: var(--mantine-primary-color-filled);
-  background: light-dark(
-    var(--mantine-color-helm-0),
-    color-mix(in srgb, var(--mantine-color-helm-9) 30%, transparent)
-  );
+  background: var(--mantine-color-helm-0);
+}
+
+:global([data-mantine-color-scheme='dark']) .column[data-over] {
+  background: color-mix(in srgb, var(--mantine-color-helm-9) 30%, transparent);
 }
 
 .cards {
