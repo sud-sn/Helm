@@ -16,14 +16,12 @@ export async function registerSpa(app: FastifyInstance, distDir: string): Promis
   await app.register(fastifyStatic, { root, wildcard: false, index: ['index.html'] });
   app.setNotFoundHandler((request, reply) => {
     if (request.url.startsWith('/api/') || request.method !== 'GET') {
-      return reply
-        .status(404)
-        .send({
-          error: {
-            code: 'NOT_FOUND',
-            message: `Route ${request.method} ${request.url} not found.`,
-          },
-        });
+      return reply.status(404).send({
+        error: {
+          code: 'NOT_FOUND',
+          message: `Route ${request.method} ${request.url} not found.`,
+        },
+      });
     }
     return reply.type('text/html').sendFile('index.html');
   });
